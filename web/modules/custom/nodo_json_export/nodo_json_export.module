@@ -1,0 +1,349 @@
+<?php
+
+/**
+ * @file
+ * Contains nodo_json_export module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\NodeInterface;
+use Drupal\paragraphs\Entity\Paragraph;
+use Drupal\block\Entity\Block;
+use Drupal\file\Entity\File;
+
+/**
+ * Implements hook_help().
+ */
+function nodo_json_export_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.nodo_json_export':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Este módulo permite exportar nodos y bloques con párrafos anidados a JSON.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function nodo_json_export_entity_operation(EntityInterface $entity) {
+  $operations = [];
+  
+  // Solo aplicar a entidades de tipo nodo
+  if ($entity instanceof NodeInterface) {
+    $operations['export_json'] = [
+      'title' => t('Exportar a JSON'),
+      'weight' => 50,
+      'url' => \Drupal\Core\Url::fromRoute('nodo_json_export.export', ['node' => $entity->id()]),
+    ];
+  }
+  
+  return $operations;
+}
+
+/**
+ * Procesa un párrafo y sus párrafos anidados recursivamente.
+ */
+function _nodo_json_export_process_paragraph(Paragraph $paragraph) {
+  $result = [];
+  $paragraph_type = $paragraph->getType();
+  
+  // Obtener todos los campos del párrafo
+  $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions('paragraph', $paragraph_type);
+  
+  // Agregar información básica del párrafo
+  $result['paragraph_id'] = $paragraph->id();
+  $result['paragraph_type'] = $paragraph_type;
+  
+  // Agregar peso si existe
+  if ($paragraph->hasField('weight') && !$paragraph->get('weight')->isEmpty()) {
+    $result['weight'] = (int) $paragraph->get('weight')->value;
+  }
+  
+  foreach ($field_definitions as $field_name => $field_definition) {
+    // Excluir campos del sistema
+    if (in_array($field_name, ['id', 'uuid', 'revision_id', 'langcode', 'type'])) {
+      continue;
+    }
+    
+    // Solo procesar si el párrafo tiene este campo
+    if ($paragraph->hasField($field_name)) {
+      $field = $paragraph->get($field_name);
+      $field_type = $field_definition->getType();
+      
+      // Procesar según el tipo de campo
+      switch ($field_type) {
+        case 'entity_reference_revisions': // Para párrafos anidados
+          if ($field_definition->getSetting('target_type') == 'paragraph') {
+            $nested_paragraphs = [];
+            foreach ($field->referencedEntities() as $nested_paragraph) {
+              $nested_paragraphs[] = _nodo_json_export_process_paragraph($nested_paragraph);
+            }
+            
+            // Ordenar por peso si existe
+            usort($nested_paragraphs, function($a, $b) {
+              $weight_a = isset($a['weight']) ? $a['weight'] : 0;
+              $weight_b = isset($b['weight']) ? $b['weight'] : 0;
+              return $weight_a - $weight_b;
+            });
+            
+            $result[$field_name] = $nested_paragraphs;
+          }
+          break;
+          
+        case 'entity_reference': // Para referencias a entidades (taxonomías, etc.)
+          $referenced_entities = [];
+          foreach ($field->referencedEntities() as $referenced_entity) {
+            $entity_values = [
+              'id' => $referenced_entity->id(),
+              'type' => $referenced_entity->getEntityTypeId(),
+              'bundle' => $referenced_entity->bundle(),
+            ];
+            
+            // Si es una entity con label, incluirla
+            if (method_exists($referenced_entity, 'label')) {
+              $entity_values['label'] = $referenced_entity->label();
+            }
+            
+            // Si tiene campo de peso, incluirlo
+            if (method_exists($referenced_entity, 'hasField') && 
+                $referenced_entity->hasField('weight') && 
+                !$referenced_entity->get('weight')->isEmpty()) {
+              $entity_values['weight'] = (int) $referenced_entity->get('weight')->value;
+            }
+            
+            $referenced_entities[] = $entity_values;
+          }
+          
+          // Ordenar por peso si existe
+          usort($referenced_entities, function($a, $b) {
+            $weight_a = isset($a['weight']) ? $a['weight'] : 0;
+            $weight_b = isset($b['weight']) ? $b['weight'] : 0;
+            return $weight_a - $weight_b;
+          });
+          
+          $result[$field_name] = $referenced_entities;
+          break;
+          
+        case 'image':
+        case 'file':
+          $files = [];
+          foreach ($field->referencedEntities() as $file) {
+            $files[] = [
+              'fid' => $file->id(),
+              'filename' => $file->getFilename(),
+              'uri' => $file->getFileUri(),
+              'url' => \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri()),
+              'relative_url' => \Drupal::service('file_url_generator')->generateString($file->getFileUri()),
+              'filemime' => $file->getMimeType(),
+              'filesize' => $file->getSize(),
+            ];
+          }
+          $result[$field_name] = $files;
+          break;
+          
+        default: // Para campos básicos (texto, número, etc.)
+          // Si el campo permite múltiples valores
+          if ($field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality() !== 1) {
+            $values = [];
+            foreach ($field->getValue() as $value) {
+              if (isset($value['value'])) {
+                $values[] = $value['value'];
+              } else {
+                $values[] = $value;
+              }
+            }
+            $result[$field_name] = $values;
+          } else {
+            // Obtener valor único
+            $value = $field->getValue();
+            if (!empty($value)) {
+              if (isset($value[0]['value'])) {
+                $result[$field_name] = $value[0]['value'];
+              } else {
+                $result[$field_name] = $value[0];
+              }
+            }
+          }
+          break;
+      }
+    }
+  }
+  
+  return $result;
+}
+
+/**
+ * Procesa un nodo completo para exportación.
+ */
+function _nodo_json_export_process_node(NodeInterface $node) {
+  $result = [
+    'nid' => $node->id(),
+    'uuid' => $node->uuid(),
+    'type' => $node->getType(),
+    'title' => $node->getTitle(),
+    'status' => $node->isPublished(),
+    'created' => $node->getCreatedTime(),
+    'changed' => $node->getChangedTime(),
+    'fields' => [],
+  ];
+  
+  // Procesar campos
+  $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', $node->getType());
+  
+  foreach ($field_definitions as $field_name => $field_definition) {
+    // Excluir campos básicos ya incluidos y campos del sistema
+    if (in_array($field_name, ['nid', 'uuid', 'vid', 'type', 'title', 'status', 'created', 'changed', 'langcode'])) {
+      continue;
+    }
+    
+    // Solo procesar si el nodo tiene este campo
+    if ($node->hasField($field_name)) {
+      $field = $node->get($field_name);
+      $field_type = $field_definition->getType();
+      
+      // Procesar según tipo de campo
+      switch ($field_type) {
+        case 'entity_reference_revisions': // Para párrafos
+          if ($field_definition->getSetting('target_type') == 'paragraph') {
+            $paragraphs = [];
+            foreach ($field->referencedEntities() as $paragraph) {
+              $paragraphs[] = _nodo_json_export_process_paragraph($paragraph);
+            }
+            
+            // Ordenar por peso si existe
+            usort($paragraphs, function($a, $b) {
+              $weight_a = isset($a['weight']) ? $a['weight'] : 0;
+              $weight_b = isset($b['weight']) ? $b['weight'] : 0;
+              return $weight_a - $weight_b;
+            });
+            
+            $result['fields'][$field_name] = $paragraphs;
+          }
+          break;
+          
+        case 'entity_reference': // Para referencias a entidades
+          $referenced_entities = [];
+          foreach ($field->referencedEntities() as $referenced_entity) {
+            $entity_values = [
+              'id' => $referenced_entity->id(),
+              'type' => $referenced_entity->getEntityTypeId(),
+              'bundle' => $referenced_entity->bundle(),
+            ];
+            
+            // Si es una entity con label, incluirla
+            if (method_exists($referenced_entity, 'label')) {
+              $entity_values['label'] = $referenced_entity->label();
+            }
+            
+            // Si tiene campo de peso, incluirlo
+            if (method_exists($referenced_entity, 'hasField') && 
+                $referenced_entity->hasField('weight') && 
+                !$referenced_entity->get('weight')->isEmpty()) {
+              $entity_values['weight'] = (int) $referenced_entity->get('weight')->value;
+            }
+            
+            $referenced_entities[] = $entity_values;
+          }
+          
+          // Ordenar por peso si existe
+          usort($referenced_entities, function($a, $b) {
+            $weight_a = isset($a['weight']) ? $a['weight'] : 0;
+            $weight_b = isset($b['weight']) ? $b['weight'] : 0;
+            return $weight_a - $weight_b;
+          });
+          
+          $result['fields'][$field_name] = $referenced_entities;
+          break;
+          
+        case 'image':
+        case 'file':
+          $files = [];
+          foreach ($field->referencedEntities() as $file) {
+            $files[] = [
+              'fid' => $file->id(),
+              'filename' => $file->getFilename(),
+              'uri' => $file->getFileUri(),
+              'url' => \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri()),
+              'relative_url' => \Drupal::service('file_url_generator')->generateString($file->getFileUri()),
+              'filemime' => $file->getMimeType(),
+              'filesize' => $file->getSize(),
+            ];
+          }
+          $result['fields'][$field_name] = $files;
+          break;
+          
+        default: // Para campos básicos
+          // Si el campo permite múltiples valores
+          if ($field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality() !== 1) {
+            $values = [];
+            foreach ($field->getValue() as $value) {
+              if (isset($value['value'])) {
+                $values[] = $value['value'];
+              } else {
+                $values[] = $value;
+              }
+            }
+            $result['fields'][$field_name] = $values;
+          } else {
+            // Obtener valor único
+            $value = $field->getValue();
+            if (!empty($value)) {
+              if (isset($value[0]['value'])) {
+                $result['fields'][$field_name] = $value[0]['value'];
+              } else {
+                $result['fields'][$field_name] = $value[0];
+              }
+            }
+          }
+          break;
+      }
+    }
+  }
+  
+  return $result;
+}
+
+/**
+ * Procesa un bloque completo para exportación.
+ */
+function _nodo_json_export_process_block(Block $block) {
+  $result = [
+    'id' => $block->id(),
+    'uuid' => $block->uuid(),
+    'plugin_id' => $block->getPluginId(),
+    'region' => $block->getRegion(),
+    'weight' => $block->getWeight(),
+    'status' => $block->status(),
+    'settings' => $block->get('settings'),
+    'visibility' => $block->getVisibility(),
+  ];
+  
+  // Obtener el contexto y los datos del plugin
+  $plugin = $block->getPlugin();
+  $plugin_definition = $plugin->getPluginDefinition();
+  
+  $result['plugin_definition'] = [
+    'id' => $plugin_definition['id'],
+    'label' => $plugin_definition['admin_label'],
+    'provider' => $plugin_definition['provider'],
+    'category' => $plugin_definition['category'] ?? '',
+  ];
+  
+  // Obtener el contenido renderizado del bloque
+  $build = $plugin->build();
+  if (!empty($build)) {
+    $renderer = \Drupal::service('renderer');
+    try {
+      $rendered = $renderer->renderPlain($build);
+      $result['rendered_content'] = (string) $rendered;
+    }
+    catch (\Exception $e) {
+      $result['rendered_content'] = 'Error rendering block: ' . $e->getMessage();
+    }
+  }
+  
+  return $result;
+}

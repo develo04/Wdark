@@ -1,0 +1,5 @@
+name: 'Nodo JSON Export'
+type: module
+description: 'Exporta nodos con párrafos anidados a formato JSON.'
+core_version_requirement: ^11
+package: 'Custom'

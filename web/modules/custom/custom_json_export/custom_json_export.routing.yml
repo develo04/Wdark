@@ -1,0 +1,36 @@
+custom_json_export.export:
+  path: '/json/node/{node}'
+  defaults:
+    _controller: '\Drupal\custom_json_export\Controller\ExportController::exportNode'
+    _title: 'JSON del Nodo'
+  requirements:
+    _permission: 'access content'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+custom_json_export.export_header:
+  path: '/json/header'
+  defaults:
+    _controller: '\Drupal\custom_json_export\Controller\ExportController::exportHeader'
+    _title: 'JSON del Header'
+  requirements:
+    _permission: 'administer blocks'
+
+custom_json_export.export_footer:
+  path: '/json/footer'
+  defaults:
+    _controller: '\Drupal\custom_json_export\Controller\ExportController::exportFooter'
+    _title: 'JSON del Footer'
+  requirements:
+    _permission: 'administer blocks'
+
+custom_json_export.export_nodes:
+  path: '/json/nodes'
+  defaults:
+    _controller: '\Drupal\custom_json_export\Controller\ExportController::exportNodes'
+    _title: 'JSON de Todos los Nodos'
+  requirements:
+    _permission: 'access content'

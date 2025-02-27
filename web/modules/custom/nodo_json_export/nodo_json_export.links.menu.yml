@@ -1,0 +1,13 @@
+nodo_json_export.export_header:
+  title: 'Exportar Header a JSON'
+  description: 'Exportar bloques del header a formato JSON'
+  parent: system.admin_structure
+  route_name: nodo_json_export.export_header
+  weight: 100
+
+nodo_json_export.export_footer:
+  title: 'Exportar Footer a JSON'
+  description: 'Exportar bloques del footer a formato JSON'
+  parent: system.admin_structure
+  route_name: nodo_json_export.export_footer
+  weight: 101
