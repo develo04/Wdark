@@ -1,0 +1,4 @@
+RestPermissions:
+  title: 'permisions to services'
+  description: "custom json"
+  restrict access: true

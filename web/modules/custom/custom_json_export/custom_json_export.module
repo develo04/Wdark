@@ -269,185 +269,314 @@ function _custom_json_export_process_paragraph(Paragraph $paragraph) {
 }
 
 /**
- * Procesa un nodo completo para exportación, incluyendo todos sus campos.
- */
-function _custom_json_export_process_node(NodeInterface $node) {
-  $result = [
-    'id' => $node->id(),
-    'type' => $node->getType(),
-    'title' => $node->getTitle() ?: '',
-    'url' => $node->toUrl()->toString() ?: '',
-    'created' => $node->getCreatedTime() ? date('Y-m-d H:i:s', $node->getCreatedTime()) : '',
-    'changed' => $node->getChangedTime() ? date('Y-m-d H:i:s', $node->getChangedTime()) : '',
-    'status' => $node->isPublished() ? 'published' : 'unpublished',
-    'fields' => [],
-  ];
-
-  // Procesar todos los campos del nodo
-  foreach ($node->getFields() as $field_name => $field) {
-    $field_type = $field->getFieldDefinition()->getType();
-    
-    // Excluir campos básicos ya incluidos
-    if (in_array($field_name, ['nid', 'uuid', 'vid', 'type', 'title', 'status', 'created', 'changed'])) {
-      continue;
-    }
-
-    if (!$field->isEmpty()) {
-      switch ($field_type) {
-        case 'entity_reference_revisions':
-          if ($field->getSetting('target_type') === 'paragraph') {
-            $paragraphs = [];
-            foreach ($field->referencedEntities() as $paragraph) {
-              $paragraph_data = _custom_json_export_process_paragraph($paragraph);
-              if ($paragraph_data) {
-                $paragraphs = array_merge($paragraphs, $paragraph_data);
-              }
-            }
-            if (!empty($paragraphs)) {
-              $result['fields'][$field_name] = $paragraphs;
-            }
-          }
-          break;
-
-        case 'entity_reference':
-          $references = [];
-          foreach ($field->referencedEntities() as $entity) {
-            $references[] = [
-              'id' => $entity->id() ?: '',
-              'type' => $entity->getEntityTypeId() ?: '',
-              'label' => method_exists($entity, 'label') ? $entity->label() ?: '' : '',
-            ];
-          }
-          if (!empty($references)) {
-            $result['fields'][$field_name] = $references;
-          }
-          break;
-
-        case 'image':
-          $images = [];
-          foreach ($field->referencedEntities() as $file) {
-            $images[] = [
-              'src' => $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '',
-              'alt' => $field->alt ?: '',
-            ];
-          }
-          if (!empty($images)) {
-            $result['fields'][$field_name] = $images;
-          }
-          break;
-
-        case 'link':
-          $links = [];
-          foreach ($field as $link) {
-            $links[] = [
-              'title' => $link->get('title')->value ?: '',
-              'url' => $link->getUrl()->toString() ?: '',
-            ];
-          }
-          if (!empty($links)) {
-            $result['fields'][$field_name] = $links;
-          }
-          break;
-
-        default:
-          if ($field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality() !== 1) {
-            $values = [];
-            foreach ($field->getValue() as $value) {
-              $values[] = $value['value'] ?? $value ?: '';
-            }
-            if (!empty($values)) {
-              $result['fields'][$field_name] = $values;
-            }
-          } else {
-            $result['fields'][$field_name] = $field->value ?: '';
-          }
-          break;
-      }
-    }
-  }
-
-  // Fusionar los párrafos procesados con los campos principales, solo si hay datos
-  if (!empty($result['fields']['field_componentes'])) {
-    $result = array_merge($result, $result['fields']['field_componentes']);
-    unset($result['fields']['field_componentes']); // Opcional: quitar field_componentes si no quieres duplicados
-
-    // Añadir el título del nodo y el subtítulo al section-main-banner si existe
-    if (isset($result['section-main-banner'])) {
-      $result['section-main-banner']['title'] = $node->getTitle() ?: ''; // Título del nodo
-      // Buscar el subtítulo en el párrafo title dentro de components
-      if (isset($result['fields']['field_componentes'])) {
-        foreach ($result['fields']['field_componentes'] as $component) {
-          if (isset($component['title']) && isset($component['title']['field_subtitle'])) {
-            $result['section-main-banner']['subtitle'] = strip_tags($component['title']['field_subtitle']) ?: '';
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  // Eliminar claves vacías o con valores vacíos del resultado final
-  $result = array_filter($result, function ($value) {
-    return !empty($value) && (!is_array($value) || count(array_filter($value)) > 0);
-  });
-
-  return $result;
-}
-
-/**
- * Exporta todos los bloques de header a JSON y los muestra en la URL.
- */
-/**
  * Procesa un bloque completo para exportación.
  */
 function _custom_json_export_process_block(Block $block) {
-  $result = [];
-  
-  // Crear la estructura base para section-header
-  $result = [
-    'logo' => [
-      'src' => '',
-      'alt' => 'WDARK Logo',
-    ],
-    'desktop-menu' => [],
-  ];
+  $result = []; // Inicializamos como array vacío, sin valores estáticos
 
-  // Procesar el logo desde el bloque olivero_site_branding
-  if ($block->id() === 'olivero_site_branding') {
-    // Obtener información del logo desde la configuración del tema
-    $theme = \Drupal::config('system.theme')->get('default');
-    $theme_settings = \Drupal::config($theme . '.settings')->get('logo');
-    
-    if (isset($theme_settings['use_default']) && $theme_settings['use_default']) {
-      // Usar el logo por defecto
-      $result['logo']['src'] = file_url_transform_relative(file_create_url($theme_settings['path']));
-    } elseif (isset($theme_settings['path']) && !empty($theme_settings['path'])) {
-      // Usar el logo personalizado
-      $result['logo']['src'] = file_url_transform_relative(file_create_url($theme_settings['path']));
-    }
-  }
-  
-  // Obtener elementos de menú independientemente del bloque procesado
-  $menu_name = 'header-menu';
-  $menu_tree = \Drupal::menuTree()->load($menu_name, new \Drupal\Core\Menu\MenuTreeParameters());
-  $menu_items = [];
-  
-  foreach ($menu_tree as $menu_link) {
-    if (isset($menu_link->link)) {
-      $title = $menu_link->link->getTitle();
-      $url = $menu_link->link->getUrlObject()->toString();
+  // Procesar el header (Logo header)
+  if ($block->id() === 'logo_header' && $block->getRegion() === 'header') {
+    // Obtener el plugin y la configuración del bloque
+    $plugin = $block->getPlugin();
+    if ($plugin) {
+      $configuration = $plugin->getConfiguration();
+      $block_content = NULL;
+
+      // Logs de depuración iniciales para el bloque
+      \Drupal::logger('custom_json_export')->notice('Procesando bloque Logo header, ID: @id, Región: @region, Plugin: @plugin, Configuración: @config', [
+        '@id' => $block->id(),
+        '@region' => $block->getRegion(),
+        '@plugin' => get_class($plugin) ?: 'NULL',
+        '@config' => var_export($configuration, TRUE),
+      ]);
+
+      // Intentar obtener la entidad del bloque de contenido
+      try {
+        if (method_exists($plugin, 'getEntity')) {
+          $block_content = $plugin->getEntity();
+          \Drupal::logger('custom_json_export')->notice('Entidad del bloque obtenida: @type, Bundle: @bundle, ID: @id, Campos: @fields', [
+            '@type' => $block_content ? $block_content->getEntityTypeId() : 'NULL',
+            '@bundle' => $block_content && $block_content->getEntityTypeId() === 'block_content' ? $block_content->bundle() : 'N/A',
+            '@id' => $block_content ? $block_content->id() : 'NULL',
+            '@fields' => $block_content ? implode(', ', array_keys($block_content->getFields())) : 'N/A',
+          ]);
+        } elseif (method_exists($plugin, 'getDerivativeId')) {
+          $derivative_id = $plugin->getDerivativeId();
+          \Drupal::logger('custom_json_export')->notice('Derivative ID: @id', ['@id' => $derivative_id ?: 'NULL']);
+          
+          if ($derivative_id) {
+            $block_content = \Drupal::entityTypeManager()->getStorage('block_content')->load($derivative_id);
+            if (!$block_content) {
+              $blocks = \Drupal::entityTypeManager()->getStorage('block_content')->loadByProperties(['uuid' => $derivative_id]);
+              $block_content = !empty($blocks) ? reset($blocks) : NULL;
+            }
+            \Drupal::logger('custom_json_export')->notice('Bloque de contenido cargado por ID/UUID: @result, Bundle: @bundle, ID: @id, Campos: @fields', [
+              '@result' => $block_content ? 'SI' : 'NO',
+              '@bundle' => $block_content ? $block_content->bundle() : 'N/A',
+              '@id' => $block_content ? $block_content->id() : 'NULL',
+              '@fields' => $block_content ? implode(', ', array_keys($block_content->getFields())) : 'N/A',
+            ]);
+          }
+        }
+      } catch (\Exception $e) {
+        \Drupal::logger('custom_json_export')->error('Error al obtener la entidad del bloque Logo header: @error, Bloque ID: @id', [
+          '@error' => $e->getMessage(),
+          '@id' => $block->id(),
+        ]);
+      }
+
+      // Si encontramos el bloque de contenido, procesar el campo field_imagen
+      if ($block_content && $block_content->getEntityTypeId() === 'block_content') {
+        \Drupal::logger('custom_json_export')->notice('Procesando bloque de contenido Logo header, ID: @id, Bundle: @bundle, Campos: @fields, Valores field_imagen: @imagen', [
+          '@id' => $block_content->id(),
+          '@bundle' => $block_content->bundle(),
+          '@fields' => implode(', ', array_keys($block_content->getFields())),
+          '@imagen' => var_export($block_content->get('field_imagen')->getValue(), TRUE),
+        ]);
+
+        // Extraer la imagen (field_imagen) como logo
+        if ($block_content->hasField('field_imagen') && !$block_content->get('field_imagen')->isEmpty()) {
+          $media = $block_content->get('field_imagen')->referencedEntities()[0];
+          \Drupal::logger('custom_json_export')->notice('Media entity encontrada para field_imagen, ID: @id, Bundle: @bundle, Campos: @fields, Valores field_media_image: @media_image', [
+            '@id' => $media->id(),
+            '@bundle' => $media->bundle(),
+            '@fields' => implode(', ', array_keys($media->getFields())),
+            '@media_image' => var_export($media->get('field_media_image')->getValue(), TRUE),
+          ]);
+
+          $file = File::load($media->get('field_media_image')->target_id);
+          if ($file) {
+            \Drupal::logger('custom_json_export')->notice('Archivo de imagen encontrado, ID: @id, URI: @uri, Nombre: @filename, Estado: @status', [
+              '@id' => $file->id(),
+              '@uri' => $file->getFileUri(),
+              '@filename' => $file->getFilename(),
+              '@status' => $file->isPermanent() ? 'Permanente' : 'Temporal',
+            ]);
+            $result['logo'] = [
+              'src' => file_url_transform_relative(file_create_url($file->getFileUri())),
+              'alt' => $media->get('field_media_image')->alt ?: '',
+            ];
+            \Drupal::logger('custom_json_export')->notice('Logo encontrado, SRC: @src, ALT: @alt', [
+              '@src' => $result['logo']['src'],
+              '@alt' => $result['logo']['alt'],
+            ]);
+          } else {
+            \Drupal::logger('custom_json_export')->warning('No se pudo cargar el archivo de la imagen para field_imagen, Media ID: @media_id, Target ID: @target_id', [
+              '@media_id' => $media->id(),
+              '@target_id' => $media->get('field_media_image')->target_id ?? 'No disponible',
+            ]);
+            // Incluir el logo con src vacío para depuración, pero solo si hay alt
+            if ($media->get('field_media_image')->alt) {
+              $result['logo'] = [
+                'src' => '',
+                'alt' => $media->get('field_media_image')->alt,
+              ];
+            }
+          }
+        }
+      }
+
+      // Obtener elementos de menú desde header-menu
+      $menu_name = 'header-menu';
+      $menu_tree = \Drupal::menuTree()->load($menu_name, new \Drupal\Core\Menu\MenuTreeParameters());
+      $menu_items = [];
       
-      // Ajustar formato para coincidir con el JSON deseado
-      $menu_items[] = [
-        'label' => strtoupper($title),
-        'href' => $url,
-      ];
+      foreach ($menu_tree as $menu_link) {
+        if (isset($menu_link->link)) {
+          $menu_items[] = [
+            'label' => strtoupper($menu_link->link->getTitle()),
+            'href' => $menu_link->link->getUrlObject()->toString(),
+          ];
+        }
+      }
+      
+      if (!empty($menu_items)) {
+        $result['desktop-menu'] = $menu_items;
+        \Drupal::logger('custom_json_export')->notice('Ítems de menú encontrados: @count', ['@count' => count($menu_items)]);
+      }
     }
   }
-  
-  if (!empty($menu_items)) {
-    $result['desktop-menu'] = $menu_items;
+
+  // Procesar el footer (cualquier bloque en la región footer para depurar)
+  elseif ($block->getRegion() === 'footer') {
+    $result = [
+      'logo' => [
+        'src' => '',
+        'alt' => 'WDARK Footer Logo',
+      ],
+      'social-networks' => [],
+      'copyright' => '',
+      'motto' => [
+        'main' => '',
+        'secondary' => '',
+      ],
+    ];
+
+    // Obtener el plugin y la configuración del bloque
+    $plugin = $block->getPlugin();
+    if ($plugin) {
+      $configuration = $plugin->getConfiguration();
+      $block_content = NULL;
+
+      // Logs de depuración iniciales para el bloque
+      \Drupal::logger('custom_json_export')->notice('Procesando bloque footer, ID: @id, Región: @region, Plugin: @plugin, Configuración: @config', [
+        '@id' => $block->id(),
+        '@region' => $block->getRegion(),
+        '@plugin' => get_class($plugin) ?: 'NULL',
+        '@config' => var_export($configuration, TRUE),
+      ]);
+
+      // Intentar obtener la entidad del bloque de contenido
+      try {
+        if (method_exists($plugin, 'getEntity')) {
+          $block_content = $plugin->getEntity();
+          \Drupal::logger('custom_json_export')->notice('Entidad del bloque obtenida: @type, Bundle: @bundle, ID: @id, Campos: @fields', [
+            '@type' => $block_content ? $block_content->getEntityTypeId() : 'NULL',
+            '@bundle' => $block_content && $block_content->getEntityTypeId() === 'block_content' ? $block_content->bundle() : 'N/A',
+            '@id' => $block_content ? $block_content->id() : 'NULL',
+            '@fields' => $block_content ? implode(', ', array_keys($block_content->getFields())) : 'N/A',
+          ]);
+        } elseif (method_exists($plugin, 'getDerivativeId')) {
+          $derivative_id = $plugin->getDerivativeId();
+          \Drupal::logger('custom_json_export')->notice('Derivative ID: @id', ['@id' => $derivative_id ?: 'NULL']);
+          
+          if ($derivative_id) {
+            $block_content = \Drupal::entityTypeManager()->getStorage('block_content')->load($derivative_id);
+            if (!$block_content) {
+              $blocks = \Drupal::entityTypeManager()->getStorage('block_content')->loadByProperties(['uuid' => $derivative_id]);
+              $block_content = !empty($blocks) ? reset($blocks) : NULL;
+            }
+            \Drupal::logger('custom_json_export')->notice('Bloque de contenido cargado por ID/UUID: @result, Bundle: @bundle, ID: @id, Campos: @fields', [
+              '@result' => $block_content ? 'SI' : 'NO',
+              '@bundle' => $block_content ? $block_content->bundle() : 'N/A',
+              '@id' => $block_content ? $block_content->id() : 'NULL',
+              '@fields' => $block_content ? implode(', ', array_keys($block_content->getFields())) : 'N/A',
+            ]);
+          }
+        }
+      } catch (\Exception $e) {
+        \Drupal::logger('custom_json_export')->error('Error al obtener la entidad del bloque footer: @error, Bloque ID: @id', [
+          '@error' => $e->getMessage(),
+          '@id' => $block->id(),
+        ]);
+      }
+
+      // Si encontramos el bloque de contenido, procesar los párrafos
+      if ($block_content && $block_content->getEntityTypeId() === 'block_content') {
+        \Drupal::logger('custom_json_export')->notice('Procesando bloque de contenido, ID: @id, Bundle: @bundle, Campos: @fields, Valores field_footer: @footer', [
+          '@id' => $block_content->id(),
+          '@bundle' => $block_content->bundle(),
+          '@fields' => implode(', ', array_keys($block_content->getFields())),
+          '@footer' => var_export($block_content->get('field_footer')->getValue(), TRUE),
+        ]);
+
+        // Verificar el campo field_footer (referencia a párrafos de tipo Footer)
+        if ($block_content->hasField('field_footer') && !$block_content->get('field_footer')->isEmpty()) {
+          $footer_paragraphs = $block_content->get('field_footer')->referencedEntities();
+          \Drupal::logger('custom_json_export')->notice('Párrafos footer encontrados: @count, IDs: @ids, Tipos: @types', [
+            '@count' => count($footer_paragraphs),
+            '@ids' => implode(', ', array_map(function($p) { return $p->id(); }, $footer_paragraphs)),
+            '@types' => implode(', ', array_map(function($p) { return $p->getType(); }, $footer_paragraphs)),
+          ]);
+          
+          foreach ($footer_paragraphs as $footer_paragraph) {
+            \Drupal::logger('custom_json_export')->notice('Procesando párrafo, ID: @id, Tipo: @type, Campos: @fields', [
+              '@id' => $footer_paragraph->id(),
+              '@type' => $footer_paragraph->getType(),
+              '@fields' => implode(', ', array_keys($footer_paragraph->getFields())),
+            ]);
+
+            if ($footer_paragraph->getType() === 'footer') {
+              // Extraer copyright
+              if ($footer_paragraph->hasField('field_copyright') && !$footer_paragraph->get('field_copyright')->isEmpty()) {
+                $result['copyright'] = $footer_paragraph->get('field_copyright')->value ?: '';
+                \Drupal::logger('custom_json_export')->notice('Copyright encontrado: @value', ['@value' => $result['copyright']]);
+              }
+
+              // Extraer motto (main y secondary)
+              if ($footer_paragraph->hasField('field_main') && !$footer_paragraph->get('field_main')->isEmpty()) {
+                $result['motto']['main'] = $footer_paragraph->get('field_main')->value ?: '';
+                \Drupal::logger('custom_json_export')->notice('Motto main encontrado: @value', ['@value' => $result['motto']['main']]);
+              }
+              if ($footer_paragraph->hasField('field_secondary') && !$footer_paragraph->get('field_secondary')->isEmpty()) {
+                $result['motto']['secondary'] = $footer_paragraph->get('field_secondary')->value ?: '';
+                \Drupal::logger('custom_json_export')->notice('Motto secondary encontrado: @value', ['@value' => $result['motto']['secondary']]);
+              }
+
+              // Extraer redes sociales desde field_social (referencia a párrafos social_networks)
+              if ($footer_paragraph->hasField('field_social') && !$footer_paragraph->get('field_social')->isEmpty()) {
+                $social_networks = [];
+                $social_paragraphs = $footer_paragraph->get('field_social')->referencedEntities();
+                \Drupal::logger('custom_json_export')->notice('Párrafos social_networks encontrados: @count, IDs: @ids, Tipos: @types', [
+                  '@count' => count($social_paragraphs),
+                  '@ids' => implode(', ', array_map(function($p) { return $p->id(); }, $social_paragraphs)),
+                  '@types' => implode(', ', array_map(function($p) { return $p->getType(); }, $social_paragraphs)),
+                ]);
+                
+                foreach ($social_paragraphs as $social_paragraph) {
+                  if ($social_paragraph->getType() === 'social_networks') {
+                    \Drupal::logger('custom_json_export')->notice('Procesando red social, ID: @id, Tipo: @type, Campos: @fields', [
+                      '@id' => $social_paragraph->id(),
+                      '@type' => $social_paragraph->getType(),
+                      '@fields' => implode(', ', array_keys($social_paragraph->getFields())),
+                    ]);
+                    
+                    if ($social_paragraph->hasField('field_link') && !$social_paragraph->get('field_link')->isEmpty()) {
+                      $link = $social_paragraph->get('field_link')->first();
+                      $social_networks[] = [
+                        'name' => $link->get('title')->getValue()[0]['value'] ?: '',
+                        'url' => $link->getUrl()->toString() ?: '',
+                      ];
+                      \Drupal::logger('custom_json_export')->notice('Red social encontrada: @name, URL: @url', [
+                        '@name' => $social_networks[count($social_networks) - 1]['name'],
+                        '@url' => $social_networks[count($social_networks) - 1]['url'],
+                      ]);
+                    }
+                  }
+                }
+                
+                if (!empty($social_networks)) {
+                  $result['social-networks'] = $social_networks;
+                }
+              }
+            }
+          }
+        }
+
+        // Extraer logo (puedes ajustar esto si el logo está en el bloque o en la configuración del tema)
+        // Por ahora, asumimos que no hay logo en el bloque footer, pero puedes descomentar y ajustar si está configurado
+        /*
+        if ($block_content->hasField('field_logo') && !$block_content->get('field_logo')->isEmpty()) {
+          $media = $block_content->get('field_logo')->referencedEntities()[0];
+          $file = File::load($media->get('field_media_image')->target_id);
+          if ($file) {
+            $result['logo']['src'] = file_url_transform_relative(file_create_url($file->getFileUri()));
+            $result['logo']['alt'] = $media->get('field_media_image')->alt ?: 'WDARK Footer Logo';
+          }
+        }
+        */
+      }
+    }
   }
+
+  // Ajustar el filtro para mantener arrays incluso si algunos valores están vacíos, pero no el array completo
+  $result = array_filter($result, function ($value) {
+    if (is_array($value)) {
+      // Mantener arrays si tienen al menos un valor no vacío o si es un array con claves (como logo con src o alt)
+      return count($value) > 0 && (isset($value['src']) || isset($value['alt']) || count(array_filter($value)) > 0);
+    }
+    return !empty($value);
+  });
+
+  // Logs de depuración mejorados
+  \Drupal::logger('custom_json_export')->notice('Procesando bloque @id, Región: @region, Logo SRC: @src, Menú ítems: @menu_count, Copyright: @copyright, Social Networks: @social_count', [
+    '@id' => $block->id(),
+    '@region' => $block->getRegion(),
+    '@src' => isset($result['logo']['src']) ? $result['logo']['src'] : 'No encontrado',
+    '@menu_count' => $block->getRegion() === 'header' ? count($result['desktop-menu'] ?? []) : 0,
+    '@copyright' => $result['copyright'] ?? 'No encontrado',
+    '@social_count' => $block->getRegion() === 'footer' ? count($result['social-networks'] ?? []) : 0,
+  ]);
 
   return $result;
 }

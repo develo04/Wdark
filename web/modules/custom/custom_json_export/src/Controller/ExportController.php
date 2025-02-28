@@ -24,37 +24,20 @@ public function exportHeader() {
   $theme = $this->config('system.theme')->get('default');
   $block_storage = \Drupal::entityTypeManager()->getStorage('block');
   
-  // Buscar el bloque site_branding para el logo
-  $branding_block = $block_storage->loadByProperties([
+  // Buscar el bloque Logo header en la región header
+  $logo_block = $block_storage->loadByProperties([
     'theme' => $theme,
-    'plugin' => 'system_branding_block',
+    'id' => 'logo_header', // Usar el ID del bloque Logo header según tu captura
     'region' => 'header',
   ]);
   
-  // Si no encuentra el bloque específico, buscar cualquier bloque en la región header
-  if (empty($branding_block)) {
-    $branding_block = $block_storage->loadByProperties([
-      'theme' => $theme,
-      'id' => 'olivero_site_branding',
-    ]);
-  }
-  
   // Procesar el bloque para el header
   $header_data = [];
-  if (!empty($branding_block)) {
-    $branding_block = reset($branding_block);
-    $header_data = _custom_json_export_process_block($branding_block);
+  if (!empty($logo_block)) {
+    $logo_block = reset($logo_block);
+    $header_data = _custom_json_export_process_block($logo_block);
   } else {
-    // Crear un resultado por defecto si no se encuentra el bloque
-    $header_data = [
-      'logo' => [
-        'src' => '',
-        'alt' => 'WDARK Logo',
-      ],
-      'desktop-menu' => [],
-    ];
-    
-    // Cargar elementos del menú directamente
+    // No crear un resultado por defecto; devolver datos dinámicos del menú si existen
     $menu_name = 'header-menu';
     $menu_tree = \Drupal::menuTree()->load($menu_name, new \Drupal\Core\Menu\MenuTreeParameters());
     $menu_items = [];
@@ -71,6 +54,11 @@ public function exportHeader() {
     if (!empty($menu_items)) {
       $header_data['desktop-menu'] = $menu_items;
     }
+  }
+
+  // Si no hay datos dinámicos (ni logo ni menú), devolver un array vacío
+  if (empty($header_data['logo']) && empty($header_data['desktop-menu'])) {
+    $header_data = [];
   }
 
   $data = [
