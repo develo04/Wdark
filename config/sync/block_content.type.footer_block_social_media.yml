@@ -1,0 +1,8 @@
+uuid: 00232c03-80d1-4108-8161-fde1ce9dca20
+langcode: es
+status: true
+dependencies: {  }
+id: footer_block_social_media
+label: 'Footer block social media'
+revision: false
+description: null

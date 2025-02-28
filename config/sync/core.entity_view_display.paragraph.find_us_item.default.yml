@@ -1,0 +1,46 @@
+uuid: 0f04672e-55f9-44f0-a685-7a26e9701301
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.find_us_item.field_icon
+    - field.field.paragraph.find_us_item.field_link
+    - field.field.paragraph.find_us_item.field_text
+    - paragraphs.paragraphs_type.find_us_item
+  module:
+    - link
+id: paragraph.find_us_item.default
+targetEntityType: paragraph
+bundle: find_us_item
+mode: default
+content:
+  field_icon:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_link:
+    type: link
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_text:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden: {  }

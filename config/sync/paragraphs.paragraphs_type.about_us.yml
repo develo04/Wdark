@@ -1,0 +1,10 @@
+uuid: 8bc5ea14-16bc-4243-97c0-38a6c580efd8
+langcode: es
+status: true
+dependencies: {  }
+id: about_us
+label: 'Componente Sobre nosotros'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

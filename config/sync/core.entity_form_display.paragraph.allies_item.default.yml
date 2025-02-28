@@ -1,0 +1,24 @@
+uuid: dfada442-9e0a-400a-abc9-d49ac7a80441
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.allies_item.field_image
+    - paragraphs.paragraphs_type.allies_item
+  module:
+    - media_library
+id: paragraph.allies_item.default
+targetEntityType: paragraph
+bundle: allies_item
+mode: default
+content:
+  field_image:
+    type: media_library_widget
+    weight: 0
+    region: content
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

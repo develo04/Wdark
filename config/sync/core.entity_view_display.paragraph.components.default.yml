@@ -1,0 +1,26 @@
+uuid: 9079a400-5ee6-4016-8676-3b4d173c5680
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.components.field_background_color
+    - field.field.paragraph.components.field_components
+    - paragraphs.paragraphs_type.components
+  module:
+    - entity_reference_revisions
+id: paragraph.components.default
+targetEntityType: paragraph
+bundle: components
+mode: default
+content:
+  field_components:
+    type: entity_reference_revisions_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_background_color: true

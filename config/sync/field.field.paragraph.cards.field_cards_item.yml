@@ -1,0 +1,67 @@
+uuid: b2d966b7-cbf3-428a-964e-d20fff82f943
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_cards_item
+    - paragraphs.paragraphs_type.cards
+    - paragraphs.paragraphs_type.cards_item
+  module:
+    - entity_reference_revisions
+id: paragraph.cards.field_cards_item
+field_name: field_cards_item
+entity_type: paragraph
+bundle: cards
+label: 'Cards item'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    target_bundles:
+      cards_item: cards_item
+    negate: 0
+    target_bundles_drag_drop:
+      about_us:
+        weight: 15
+        enabled: false
+      about_us_item:
+        weight: 16
+        enabled: false
+      allies_item:
+        weight: 17
+        enabled: false
+      button:
+        weight: 18
+        enabled: false
+      cards:
+        weight: 14
+        enabled: false
+      cards_item:
+        weight: 19
+        enabled: true
+      component_find_us:
+        weight: 20
+        enabled: false
+      component_follow_us:
+        weight: 21
+        enabled: false
+      componente_aliados:
+        weight: 22
+        enabled: false
+      components:
+        weight: 23
+        enabled: false
+      find_us_item:
+        weight: 24
+        enabled: false
+      follow_us_item:
+        weight: 25
+        enabled: false
+      title:
+        weight: 26
+        enabled: false
+field_type: entity_reference_revisions

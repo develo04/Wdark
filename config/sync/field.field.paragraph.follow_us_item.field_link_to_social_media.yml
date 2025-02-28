@@ -1,0 +1,23 @@
+uuid: f9819e93-ef90-470c-9cf4-595d1936ef51
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_link_to_social_media
+    - paragraphs.paragraphs_type.follow_us_item
+  module:
+    - link
+id: paragraph.follow_us_item.field_link_to_social_media
+field_name: field_link_to_social_media
+entity_type: paragraph
+bundle: follow_us_item
+label: 'Link to social media'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  title: 1
+  link_type: 17
+field_type: link

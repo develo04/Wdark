@@ -1,0 +1,29 @@
+uuid: d7c23898-34e1-489d-8842-ab4f0471ed50
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_icon
+    - media.type.icons
+    - paragraphs.paragraphs_type.find_us_item
+id: paragraph.find_us_item.field_icon
+field_name: field_icon
+entity_type: paragraph
+bundle: find_us_item
+label: Icono
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      icons: icons
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

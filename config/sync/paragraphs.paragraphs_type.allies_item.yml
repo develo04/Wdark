@@ -1,0 +1,10 @@
+uuid: 8119c2fd-d2fa-467a-b9da-72f14a7e3b6c
+langcode: es
+status: true
+dependencies: {  }
+id: allies_item
+label: 'Aliados item'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

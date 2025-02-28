@@ -1,0 +1,25 @@
+uuid: a7cbd904-296c-4d9d-a63e-162ad5d0fc29
+langcode: es
+status: true
+dependencies:
+  config:
+    - system.menu.header-menu
+  module:
+    - system
+  theme:
+    - olivero
+id: olivero_headermenu
+theme: olivero
+region: header
+weight: -5
+provider: null
+plugin: 'system_menu_block:header-menu'
+settings:
+  id: 'system_menu_block:header-menu'
+  label: 'Header menu'
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }

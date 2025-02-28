@@ -1,0 +1,11 @@
+uuid: e03dbd62-a012-4e18-8cc6-3600f4cdc9ca
+langcode: es
+status: true
+dependencies:
+  config:
+    - block_content.type.footer_block_social_media
+id: block_content.footer_block_social_media
+target_entity_type_id: block_content
+target_bundle: footer_block_social_media
+default_langcode: site_default
+language_alterable: false

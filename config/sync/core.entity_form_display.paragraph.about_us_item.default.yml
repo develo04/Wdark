@@ -1,0 +1,31 @@
+uuid: ed2ef5cf-9a50-42a5-b7ed-a19609a8a85a
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.about_us_item.field_percentage
+    - field.field.paragraph.about_us_item.field_text
+    - paragraphs.paragraphs_type.about_us_item
+id: paragraph.about_us_item.default
+targetEntityType: paragraph
+bundle: about_us_item
+mode: default
+content:
+  field_percentage:
+    type: number
+    weight: 1
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_text:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

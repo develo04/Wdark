@@ -1,0 +1,10 @@
+uuid: 1cc4ec63-6b7b-4af6-9485-fb2f39c5cf0b
+langcode: es
+status: true
+dependencies: {  }
+id: button
+label: 'Componente Botón'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

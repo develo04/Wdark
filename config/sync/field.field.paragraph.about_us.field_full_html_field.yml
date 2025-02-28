@@ -1,0 +1,24 @@
+uuid: 839e0df3-2bed-4087-846a-3db99713dd12
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_full_html_field
+    - filter.format.full_html
+    - paragraphs.paragraphs_type.about_us
+  module:
+    - text
+id: paragraph.about_us.field_full_html_field
+field_name: field_full_html_field
+entity_type: paragraph
+bundle: about_us
+label: 'Campo Full Html'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats:
+    - full_html
+field_type: text_long

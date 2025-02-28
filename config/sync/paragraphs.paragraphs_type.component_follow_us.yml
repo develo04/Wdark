@@ -1,0 +1,10 @@
+uuid: 0b7d3b5d-410b-472b-b817-72b3a1ac397d
+langcode: es
+status: true
+dependencies: {  }
+id: component_follow_us
+label: 'Component Follow Us '
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

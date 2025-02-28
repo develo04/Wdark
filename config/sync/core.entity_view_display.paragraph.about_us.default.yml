@@ -1,0 +1,33 @@
+uuid: b2a226b1-d488-48a8-99c9-5c452f110e8c
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.about_us.field_full_html_field
+    - field.field.paragraph.about_us.field_item_acerca_de_nosotros
+    - paragraphs.paragraphs_type.about_us
+  module:
+    - entity_reference_revisions
+    - text
+id: paragraph.about_us.default
+targetEntityType: paragraph
+bundle: about_us
+mode: default
+content:
+  field_full_html_field:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_item_acerca_de_nosotros:
+    type: entity_reference_revisions_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden: {  }

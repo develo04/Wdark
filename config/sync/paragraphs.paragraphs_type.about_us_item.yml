@@ -1,0 +1,10 @@
+uuid: 86a52ce0-a1d5-48f9-8166-c2d0eaa9ee22
+langcode: es
+status: true
+dependencies: {  }
+id: about_us_item
+label: 'Item acerca de nosotros'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

@@ -1,0 +1,19 @@
+uuid: f4b45964-9bd6-4deb-aa8f-4b2694a5e134
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_auth_position
+    - node.type.blog
+id: node.blog.field_auth_position
+field_name: field_auth_position
+entity_type: node
+bundle: blog
+label: 'Cargo del autor'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

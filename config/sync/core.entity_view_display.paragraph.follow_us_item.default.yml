@@ -1,0 +1,36 @@
+uuid: ff5ce59f-686c-4380-87a6-913c60e999fb
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.follow_us_item.field_link_to_social_media
+    - field.field.paragraph.follow_us_item.field_svg_code_icon
+    - paragraphs.paragraphs_type.follow_us_item
+  module:
+    - link
+id: paragraph.follow_us_item.default
+targetEntityType: paragraph
+bundle: follow_us_item
+mode: default
+content:
+  field_link_to_social_media:
+    type: link
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: '0'
+      target: _blank
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_svg_code_icon:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
+hidden: {  }

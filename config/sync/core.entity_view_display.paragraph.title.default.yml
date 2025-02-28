@@ -1,0 +1,25 @@
+uuid: fbb2ad08-8960-4fac-936a-b6e0d35d0e2f
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.title.field_subtitle
+    - paragraphs.paragraphs_type.title
+  module:
+    - string_field_formatter
+id: paragraph.title.default
+targetEntityType: paragraph
+bundle: title
+mode: default
+content:
+  field_subtitle:
+    type: plain_string_formatter
+    label: hidden
+    settings:
+      link_to_entity: false
+      wrap_tag: h2
+      wrap_class: ''
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden: {  }

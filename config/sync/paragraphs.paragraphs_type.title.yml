@@ -1,0 +1,10 @@
+uuid: 89a6dfef-ca86-45aa-a5ca-574bf7cd9747
+langcode: es
+status: true
+dependencies: {  }
+id: title
+label: 'Componente Título'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

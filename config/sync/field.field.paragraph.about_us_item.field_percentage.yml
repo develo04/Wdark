@@ -1,0 +1,23 @@
+uuid: 3dc791f6-5abf-4e05-b1a1-96b07f7ae20e
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_percentage
+    - paragraphs.paragraphs_type.about_us_item
+id: paragraph.about_us_item.field_percentage
+field_name: field_percentage
+entity_type: paragraph
+bundle: about_us_item
+label: Porcentaje
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: '%'
+field_type: integer

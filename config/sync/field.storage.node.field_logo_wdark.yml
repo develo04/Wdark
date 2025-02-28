@@ -1,0 +1,20 @@
+uuid: 1a8bbc18-9e6e-4eac-b806-29c33b5761b7
+langcode: es
+status: true
+dependencies:
+  module:
+    - media
+    - node
+id: node.field_logo_wdark
+field_name: field_logo_wdark
+entity_type: node
+type: entity_reference
+settings:
+  target_type: media
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

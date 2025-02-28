@@ -1,0 +1,11 @@
+uuid: c8695c7a-a6bd-44bc-a7bc-a43c5fa1912d
+langcode: es
+status: true
+dependencies:
+  config:
+    - media.type.icons
+id: media.icons
+target_entity_type_id: media
+target_bundle: icons
+default_langcode: site_default
+language_alterable: false

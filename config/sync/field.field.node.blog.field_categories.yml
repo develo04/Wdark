@@ -1,0 +1,21 @@
+uuid: cdb461f2-c49a-450d-9f6b-5014934e7c7e
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_categories
+    - node.type.blog
+  module:
+    - options
+id: node.blog.field_categories
+field_name: field_categories
+entity_type: node
+bundle: blog
+label: Categorías
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

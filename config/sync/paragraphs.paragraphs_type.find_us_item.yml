@@ -1,0 +1,10 @@
+uuid: ca60ad01-c9b7-498a-b75c-89d4fbb6ce18
+langcode: es
+status: true
+dependencies: {  }
+id: find_us_item
+label: 'Encuentranos item'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

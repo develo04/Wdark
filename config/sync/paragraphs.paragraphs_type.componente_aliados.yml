@@ -1,0 +1,10 @@
+uuid: 380bbeef-744d-4394-8160-7d10b2b6b053
+langcode: es
+status: true
+dependencies: {  }
+id: componente_aliados
+label: 'Componente Aliados'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

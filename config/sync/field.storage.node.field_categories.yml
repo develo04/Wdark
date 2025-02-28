@@ -1,0 +1,30 @@
+uuid: b85be14f-c430-4a8c-8484-5d3c7326693b
+langcode: es
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_categories
+field_name: field_categories
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: creativity
+      label: Creatividad
+    -
+      value: drupal
+      label: Drupal
+    -
+      value: github
+      label: GitHub
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

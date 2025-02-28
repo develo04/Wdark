@@ -1,0 +1,51 @@
+uuid: 1f614770-a994-4328-816c-0e6515211abd
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.footer.field_copyright
+    - field.field.paragraph.footer.field_main
+    - field.field.paragraph.footer.field_secondary
+    - field.field.paragraph.footer.field_social
+    - paragraphs.paragraphs_type.footer
+  module:
+    - entity_reference_revisions
+id: paragraph.footer.default
+targetEntityType: paragraph
+bundle: footer
+mode: default
+content:
+  field_copyright:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_main:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_secondary:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_social:
+    type: entity_reference_revisions_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden: {  }

@@ -1,0 +1,10 @@
+uuid: 4c6266e8-98e0-4abb-a45a-b76708a29f18
+langcode: es
+status: true
+dependencies: {  }
+id: follow_us_item
+label: 'Follow Us item'
+icon_uuid: null
+icon_default: null
+description: 'Items to social media paragraph'
+behavior_plugins: {  }

@@ -1,0 +1,19 @@
+uuid: 9bbda9a2-e37b-4596-9f7d-73caa30257f1
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_svg_code_icon
+    - paragraphs.paragraphs_type.follow_us_item
+id: paragraph.follow_us_item.field_svg_code_icon
+field_name: field_svg_code_icon
+entity_type: paragraph
+bundle: follow_us_item
+label: 'Svg code icon'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

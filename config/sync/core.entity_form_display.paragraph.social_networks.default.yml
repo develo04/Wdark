@@ -1,0 +1,25 @@
+uuid: fe8295d7-a50e-46de-b718-0dcf975a808f
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.social_networks.field_link
+    - paragraphs.paragraphs_type.social_networks
+  module:
+    - link
+id: paragraph.social_networks.default
+targetEntityType: paragraph
+bundle: social_networks
+mode: default
+content:
+  field_link:
+    type: link_default
+    weight: 0
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

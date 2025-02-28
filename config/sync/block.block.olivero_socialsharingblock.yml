@@ -1,0 +1,28 @@
+uuid: b57b2582-497a-4f07-bc2f-1c045611e704
+langcode: es
+status: true
+dependencies:
+  module:
+    - node
+    - social_media
+  theme:
+    - olivero
+id: olivero_socialsharingblock
+theme: olivero
+region: content
+weight: 0
+provider: null
+plugin: social_sharing_block
+settings:
+  id: social_sharing_block
+  label: 'Social Sharing block'
+  label_display: '0'
+  provider: social_media
+visibility:
+  'entity_bundle:node':
+    id: 'entity_bundle:node'
+    negate: false
+    context_mapping:
+      node: '@node.node_route_context:node'
+    bundles:
+      blog: blog

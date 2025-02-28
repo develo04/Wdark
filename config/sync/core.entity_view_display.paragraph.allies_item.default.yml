@@ -1,0 +1,22 @@
+uuid: fa2305e4-ef57-4944-807f-a14038ab7df6
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.allies_item.field_image
+    - paragraphs.paragraphs_type.allies_item
+id: paragraph.allies_item.default
+targetEntityType: paragraph
+bundle: allies_item
+mode: default
+content:
+  field_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden: {  }

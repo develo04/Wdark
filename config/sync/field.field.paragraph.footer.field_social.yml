@@ -1,0 +1,73 @@
+uuid: 96abc4c5-8641-4564-a267-520404af27a1
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_social
+    - paragraphs.paragraphs_type.footer
+    - paragraphs.paragraphs_type.social_networks
+  module:
+    - entity_reference_revisions
+id: paragraph.footer.field_social
+field_name: field_social
+entity_type: paragraph
+bundle: footer
+label: social
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    target_bundles:
+      social_networks: social_networks
+    negate: 0
+    target_bundles_drag_drop:
+      about_us:
+        weight: 17
+        enabled: false
+      about_us_item:
+        weight: 18
+        enabled: false
+      allies_item:
+        weight: 19
+        enabled: false
+      button:
+        weight: 20
+        enabled: false
+      cards:
+        weight: 21
+        enabled: false
+      cards_item:
+        weight: 22
+        enabled: false
+      component_find_us:
+        weight: 23
+        enabled: false
+      component_follow_us:
+        weight: 24
+        enabled: false
+      componente_aliados:
+        weight: 25
+        enabled: false
+      components:
+        weight: 26
+        enabled: false
+      find_us_item:
+        weight: 27
+        enabled: false
+      follow_us_item:
+        weight: 28
+        enabled: false
+      footer:
+        weight: 16
+        enabled: false
+      social_networks:
+        weight: 29
+        enabled: true
+      title:
+        weight: 30
+        enabled: false
+field_type: entity_reference_revisions

@@ -1,0 +1,110 @@
+uuid: 44eb62c2-9c22-473b-b417-4c02d1225266
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.node.blog.field_auth_name
+    - field.field.node.blog.field_auth_position
+    - field.field.node.blog.field_categories
+    - field.field.node.blog.field_full_html_text
+    - field.field.node.blog.field_logo_wdark
+    - field.field.node.blog.field_principal_image_blog
+    - field.field.node.blog.field_subtitle
+    - node.type.blog
+  module:
+    - field_group
+    - options
+    - text
+    - user
+third_party_settings:
+  field_group:
+    group_container_user_data:
+      children:
+        - field_logo_wdark
+        - field_auth_name
+        - field_auth_position
+      label: 'Container user data'
+      parent_name: ''
+      region: content
+      weight: 6
+      format_type: html_element
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+id: node.blog.default
+targetEntityType: node
+bundle: blog
+mode: default
+content:
+  field_auth_name:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  field_auth_position:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 9
+    region: content
+  field_categories:
+    type: list_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_full_html_text:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_logo_wdark:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_principal_image_blog:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_subtitle:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  langcode: true

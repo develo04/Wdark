@@ -1,0 +1,23 @@
+uuid: be1f77a2-dad3-4938-a74d-e4b26d6be637
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.title.field_subtitle
+    - paragraphs.paragraphs_type.title
+id: paragraph.title.default
+targetEntityType: paragraph
+bundle: title
+mode: default
+content:
+  field_subtitle:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

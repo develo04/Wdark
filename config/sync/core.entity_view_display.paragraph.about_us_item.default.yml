@@ -1,0 +1,31 @@
+uuid: 7b9539fe-bcff-4cb8-8eb1-e79c54ef4149
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.about_us_item.field_percentage
+    - field.field.paragraph.about_us_item.field_text
+    - paragraphs.paragraphs_type.about_us_item
+id: paragraph.about_us_item.default
+targetEntityType: paragraph
+bundle: about_us_item
+mode: default
+content:
+  field_percentage:
+    type: number_integer
+    label: hidden
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_text:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden: {  }

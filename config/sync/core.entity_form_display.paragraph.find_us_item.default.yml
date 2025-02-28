@@ -1,0 +1,43 @@
+uuid: 65c18d89-197b-4e72-ae33-f65245100245
+langcode: es
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.find_us_item.field_icon
+    - field.field.paragraph.find_us_item.field_link
+    - field.field.paragraph.find_us_item.field_text
+    - paragraphs.paragraphs_type.find_us_item
+  module:
+    - link
+    - media_library
+id: paragraph.find_us_item.default
+targetEntityType: paragraph
+bundle: find_us_item
+mode: default
+content:
+  field_icon:
+    type: media_library_widget
+    weight: 0
+    region: content
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
+  field_link:
+    type: link_default
+    weight: 0
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+  field_text:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

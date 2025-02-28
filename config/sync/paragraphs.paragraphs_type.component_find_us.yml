@@ -1,0 +1,10 @@
+uuid: 0e64a0c8-c704-4d5a-92b0-f7dcc0a8b070
+langcode: es
+status: true
+dependencies: {  }
+id: component_find_us
+label: 'Componente encuentranos'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }
