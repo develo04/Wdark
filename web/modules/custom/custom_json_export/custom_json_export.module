@@ -1,0 +1,453 @@
+<?php
+
+/**
+ * @file
+ * Contains custom_json_export module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\node\NodeInterface;
+use Drupal\paragraphs\Entity\Paragraph;
+use Drupal\block\Entity\Block;
+use Drupal\file\Entity\File;
+
+/**
+ * Implements hook_help().
+ */
+function custom_json_export_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.custom_json_export':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Este módulo permite exportar nodos y bloques con párrafos anidados a JSON en un formato personalizado.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function custom_json_export_entity_operation(EntityInterface $entity) {
+  $operations = [];
+  
+  if ($entity instanceof NodeInterface) {
+    $operations['export_json'] = [
+      'title' => t('Exportar a JSON'),
+      'weight' => 50,
+      'url' => \Drupal\Core\Url::fromRoute('custom_json_export.export', ['node' => $entity->id()]),
+    ];
+  }
+  
+  return $operations;
+}
+
+/**
+ * Procesa un párrafo y sus párrafos anidados recursivamente.
+ */
+function _custom_json_export_process_paragraph(Paragraph $paragraph) {
+  $result = [];
+
+  switch ($paragraph->getType()) {
+    case 'components':
+      if ($paragraph->hasField('field_components')) {
+        foreach ($paragraph->get('field_components')->referencedEntities() as $sub_paragraph) {
+          $sub_data = _custom_json_export_process_paragraph($sub_paragraph);
+          if ($sub_data) {
+            $result = array_merge($result, $sub_data);
+          }
+        }
+      }
+      break;
+
+    case 'title':
+      if ($paragraph->hasField('field_subtitle')) {
+        $subtitle = $paragraph->get('field_subtitle')->value;
+        $result['section-main-banner'] = [
+          'id' => '',
+          'title' => '',
+          'subtitle' => strip_tags($subtitle) ?: '',
+        ];
+      }
+      break;
+
+    case 'button':
+      if ($paragraph->hasField('field_link')) {
+        $link = $paragraph->get('field_link')->first();
+        $result['section-main-banner']['cta'] = [
+          'text' => $link->get('title')->getValue() ?: '',
+          'link' => $link->getUrl()->toString() ?: '',
+        ];
+      }
+      break;
+
+    case 'about_us':
+      $result['section-about-us'] = [
+        'id' => '',
+        'title' => '',
+      ];
+      if ($paragraph->hasField('field_full_html_field')) {
+        $result['section-about-us']['description'] = strip_tags($paragraph->get('field_full_html_field')->value) ?: '';
+      }
+      if ($paragraph->hasField('field_item_acerca_de_nosotros')) {
+        $skills = [];
+        foreach ($paragraph->get('field_item_acerca_de_nosotros')->referencedEntities() as $item) {
+          $skills[] = [
+            'name' => $item->get('field_text')->value ?: '',
+            'percent' => $item->hasField('field_percentage') ? (int) $item->get('field_percentage')->value : 0,
+          ];
+        }
+        if (!empty($skills)) {
+          $result['section-about-us']['skills'] = [
+            'list' => array_column($skills, 'name'),
+            'percents' => array_column($skills, 'percent'),
+          ];
+        }
+      }
+      if ($paragraph->hasField('field_link')) {
+        $link = $paragraph->get('field_link')->first();
+        $result['section-about-us']['cta'] = [
+          'text' => $link->get('title')->getValue() ?: '',
+        ];
+      }
+      break;
+
+    case 'cards':
+      if ($paragraph->hasField('field_cards_item')) {
+        $services = [];
+        foreach ($paragraph->get('field_cards_item')->referencedEntities() as $card) {
+          $service = [
+            'name' => $card->get('field_text')->value ?: '',
+            'description' => strip_tags($card->get('field_full_html_field')->value) ?: '',
+          ];
+          if ($card->hasField('field_link')) {
+            $link = $card->get('field_link')->first();
+            $service['cta'] = $link->get('title')->getValue() ?: '';
+          }
+          if ($card->hasField('field_icon')) {
+            $icon = $card->get('field_icon')->referencedEntities()[0];
+            $file = File::load($icon->get('field_media_image')->target_id);
+            $service['image'] = $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '';
+          }
+          if (!empty($service['name']) || !empty($service['description']) || !empty($service['cta']) || !empty($service['image'])) {
+            $services[] = $service;
+          }
+        }
+        if (!empty($services)) {
+          $result['section-services']['services'] = $services;
+        }
+      }
+      break;
+
+    case 'componente_aliados':
+      $result['section-allies'] = [
+        'title' => $paragraph->get('field_subtitle')->value ?: '',
+        'allies' => [],
+      ];
+      if ($paragraph->hasField('field_aliados_item')) {
+        $allies = [];
+        foreach ($paragraph->get('field_aliados_item')->referencedEntities() as $ally) {
+          $image = $ally->get('field_image')->referencedEntities()[0];
+          $file = File::load($image->get('field_media_image')->target_id);
+          $ally_data = [
+            'link' => '',
+            'image' => $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '',
+            'alt' => $image->get('field_media_image')->alt ?: '',
+          ];
+          if (!empty($ally_data['image']) || !empty($ally_data['alt'])) {
+            $allies[] = $ally_data;
+          }
+        }
+        if (!empty($allies)) {
+          $result['section-allies']['allies'] = $allies;
+        }
+      }
+      break;
+
+    case 'contact':
+      $result['section-contact'] = [
+        'title' => '',
+        'contact-methods' => [],
+      ];
+      if ($paragraph->hasField('field_contact_methods')) {
+        $methods = [];
+        foreach ($paragraph->get('field_contact_methods')->referencedEntities() as $method) {
+          $method_data = [
+            'type' => $method->get('field_type')->value ?: '',
+            'title' => $method->get('field_title')->value ?: '',
+            'value' => $method->get('field_value')->value ?: '',
+            'image' => $method->hasField('field_image') && $file = File::load($method->get('field_image')->target_id) 
+              ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) 
+              : '',
+          ];
+          if (!empty($method_data['type']) || !empty($method_data['title']) || !empty($method_data['value']) || !empty($method_data['image'])) {
+            $methods[] = $method_data;
+          }
+        }
+        if (!empty($methods)) {
+          $result['section-contact']['contact-methods'] = $methods;
+        }
+      }
+      break;
+
+    case 'component_find_us':
+      $result['section-contact'] = [
+        'title' => $paragraph->hasField('field_subtitle') ? $paragraph->get('field_subtitle')->value : '',
+        'contact-methods' => [],
+      ];
+      if ($paragraph->hasField('field_findus_item')) {
+        $methods = [];
+        foreach ($paragraph->get('field_findus_item')->referencedEntities() as $item) {
+          $method = [
+            'title' => $item->hasField('field_text') ? $item->get('field_text')->value : '',
+          ];
+          
+          if (stripos($method['title'], 'LLAMANOS') !== false || stripos($method['title'], 'LLÁMANOS') !== false) {
+            $method['type'] = 'phone';
+          } elseif (stripos($method['title'], 'UBICANOS') !== false || stripos($method['title'], 'UBÍCANOS') !== false) {
+            $method['type'] = 'location';
+          } elseif (stripos($method['title'], 'ESCRIBENOS') !== false || stripos($method['title'], 'ESCRÍBENOS') !== false) {
+            $method['type'] = 'email';
+          } else {
+            $method['type'] = '';
+          }
+
+          $method['value'] = $item->hasField('field_value') ? $item->get('field_value')->value : '';
+          if ($item->hasField('field_icon') && !$item->get('field_icon')->isEmpty()) {
+            $icon = $item->get('field_icon')->referencedEntities()[0];
+            $file = File::load($icon->get('field_media_image')->target_id);
+            $method['image'] = $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '';
+          } else {
+            $method['image'] = '';
+          }
+          if ($item->hasField('field_link') && !$item->get('field_link')->isEmpty()) {
+            $link = $item->get('field_link')->first();
+            $method['link'] = $link->getUrl()->toString() ?: '';
+          } else {
+            $method['link'] = '';
+          }
+          if (!empty($method['type']) || !empty($method['title']) || !empty($method['value']) || !empty($method['image']) || !empty($method['link'])) {
+            $methods[] = $method;
+          }
+        }
+        if (!empty($methods)) {
+          $result['section-contact']['contact-methods'] = $methods;
+        }
+      }
+      break;
+
+    default:
+      $result[$paragraph->getType()] = [];
+      foreach ($paragraph->getFields() as $field_name => $field) {
+        if (!in_array($field_name, ['id', 'uuid', 'revision_id', 'langcode', 'type', 'parent_id', 'parent_type', 'parent_field_name'])) {
+          if ($field->getFieldDefinition()->getType() === 'entity_reference_revisions' && $field->getSetting('target_type') === 'paragraph') {
+            $nested = [];
+            foreach ($field->referencedEntities() as $nested_paragraph) {
+              $nested_data = _custom_json_export_process_paragraph($nested_paragraph);
+              if ($nested_data) {
+                $nested[] = $nested_data;
+              }
+            }
+            if (!empty($nested)) {
+              $result[$paragraph->getType()][$field_name] = $nested;
+            }
+          } elseif ($field->getFieldDefinition()->getType() === 'image' && !$field->isEmpty()) {
+            $file = $field->entity;
+            $result[$paragraph->getType()][$field_name] = [
+              'src' => $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '',
+              'alt' => $field->alt ?: '',
+            ];
+          } elseif (!$field->isEmpty()) {
+            $result[$paragraph->getType()][$field_name] = $field->value ?: '';
+          }
+        }
+      }
+      break;
+  }
+
+  return $result;
+}
+
+/**
+ * Procesa un nodo completo para exportación, incluyendo todos sus campos.
+ */
+function _custom_json_export_process_node(NodeInterface $node) {
+  $result = [
+    'id' => $node->id(),
+    'type' => $node->getType(),
+    'title' => $node->getTitle() ?: '',
+    'url' => $node->toUrl()->toString() ?: '',
+    'created' => $node->getCreatedTime() ? date('Y-m-d H:i:s', $node->getCreatedTime()) : '',
+    'changed' => $node->getChangedTime() ? date('Y-m-d H:i:s', $node->getChangedTime()) : '',
+    'status' => $node->isPublished() ? 'published' : 'unpublished',
+    'fields' => [],
+  ];
+
+  // Procesar todos los campos del nodo
+  foreach ($node->getFields() as $field_name => $field) {
+    $field_type = $field->getFieldDefinition()->getType();
+    
+    // Excluir campos básicos ya incluidos
+    if (in_array($field_name, ['nid', 'uuid', 'vid', 'type', 'title', 'status', 'created', 'changed'])) {
+      continue;
+    }
+
+    if (!$field->isEmpty()) {
+      switch ($field_type) {
+        case 'entity_reference_revisions':
+          if ($field->getSetting('target_type') === 'paragraph') {
+            $paragraphs = [];
+            foreach ($field->referencedEntities() as $paragraph) {
+              $paragraph_data = _custom_json_export_process_paragraph($paragraph);
+              if ($paragraph_data) {
+                $paragraphs = array_merge($paragraphs, $paragraph_data);
+              }
+            }
+            if (!empty($paragraphs)) {
+              $result['fields'][$field_name] = $paragraphs;
+            }
+          }
+          break;
+
+        case 'entity_reference':
+          $references = [];
+          foreach ($field->referencedEntities() as $entity) {
+            $references[] = [
+              'id' => $entity->id() ?: '',
+              'type' => $entity->getEntityTypeId() ?: '',
+              'label' => method_exists($entity, 'label') ? $entity->label() ?: '' : '',
+            ];
+          }
+          if (!empty($references)) {
+            $result['fields'][$field_name] = $references;
+          }
+          break;
+
+        case 'image':
+          $images = [];
+          foreach ($field->referencedEntities() as $file) {
+            $images[] = [
+              'src' => $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '',
+              'alt' => $field->alt ?: '',
+            ];
+          }
+          if (!empty($images)) {
+            $result['fields'][$field_name] = $images;
+          }
+          break;
+
+        case 'link':
+          $links = [];
+          foreach ($field as $link) {
+            $links[] = [
+              'title' => $link->get('title')->value ?: '',
+              'url' => $link->getUrl()->toString() ?: '',
+            ];
+          }
+          if (!empty($links)) {
+            $result['fields'][$field_name] = $links;
+          }
+          break;
+
+        default:
+          if ($field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality() !== 1) {
+            $values = [];
+            foreach ($field->getValue() as $value) {
+              $values[] = $value['value'] ?? $value ?: '';
+            }
+            if (!empty($values)) {
+              $result['fields'][$field_name] = $values;
+            }
+          } else {
+            $result['fields'][$field_name] = $field->value ?: '';
+          }
+          break;
+      }
+    }
+  }
+
+  // Fusionar los párrafos procesados con los campos principales, solo si hay datos
+  if (!empty($result['fields']['field_componentes'])) {
+    $result = array_merge($result, $result['fields']['field_componentes']);
+    unset($result['fields']['field_componentes']); // Opcional: quitar field_componentes si no quieres duplicados
+
+    // Añadir el título del nodo y el subtítulo al section-main-banner si existe
+    if (isset($result['section-main-banner'])) {
+      $result['section-main-banner']['title'] = $node->getTitle() ?: ''; // Título del nodo
+      // Buscar el subtítulo en el párrafo title dentro de components
+      if (isset($result['fields']['field_componentes'])) {
+        foreach ($result['fields']['field_componentes'] as $component) {
+          if (isset($component['title']) && isset($component['title']['field_subtitle'])) {
+            $result['section-main-banner']['subtitle'] = strip_tags($component['title']['field_subtitle']) ?: '';
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // Eliminar claves vacías o con valores vacíos del resultado final
+  $result = array_filter($result, function ($value) {
+    return !empty($value) && (!is_array($value) || count(array_filter($value)) > 0);
+  });
+
+  return $result;
+}
+
+/**
+ * Exporta todos los bloques de header a JSON y los muestra en la URL.
+ */
+/**
+ * Procesa un bloque completo para exportación.
+ */
+function _custom_json_export_process_block(Block $block) {
+  $result = [];
+  
+  // Crear la estructura base para section-header
+  $result = [
+    'logo' => [
+      'src' => '',
+      'alt' => 'WDARK Logo',
+    ],
+    'desktop-menu' => [],
+  ];
+
+  // Procesar el logo desde el bloque olivero_site_branding
+  if ($block->id() === 'olivero_site_branding') {
+    // Obtener información del logo desde la configuración del tema
+    $theme = \Drupal::config('system.theme')->get('default');
+    $theme_settings = \Drupal::config($theme . '.settings')->get('logo');
+    
+    if (isset($theme_settings['use_default']) && $theme_settings['use_default']) {
+      // Usar el logo por defecto
+      $result['logo']['src'] = file_url_transform_relative(file_create_url($theme_settings['path']));
+    } elseif (isset($theme_settings['path']) && !empty($theme_settings['path'])) {
+      // Usar el logo personalizado
+      $result['logo']['src'] = file_url_transform_relative(file_create_url($theme_settings['path']));
+    }
+  }
+  
+  // Obtener elementos de menú independientemente del bloque procesado
+  $menu_name = 'header-menu';
+  $menu_tree = \Drupal::menuTree()->load($menu_name, new \Drupal\Core\Menu\MenuTreeParameters());
+  $menu_items = [];
+  
+  foreach ($menu_tree as $menu_link) {
+    if (isset($menu_link->link)) {
+      $title = $menu_link->link->getTitle();
+      $url = $menu_link->link->getUrlObject()->toString();
+      
+      // Ajustar formato para coincidir con el JSON deseado
+      $menu_items[] = [
+        'label' => strtoupper($title),
+        'href' => $url,
+      ];
+    }
+  }
+  
+  if (!empty($menu_items)) {
+    $result['desktop-menu'] = $menu_items;
+  }
+
+  return $result;
+}

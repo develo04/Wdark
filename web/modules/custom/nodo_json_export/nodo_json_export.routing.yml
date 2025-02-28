@@ -1,0 +1,28 @@
+nodo_json_export.export:
+  path: '/admin/content/node/{node}/export-json'
+  defaults:
+    _controller: '\Drupal\nodo_json_export\Controller\ExportController::exportNode'
+    _title: 'Exportar Nodo a JSON'
+  requirements:
+    _permission: 'access content'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+nodo_json_export.export_header:
+  path: '/admin/structure/block/export-header-json'
+  defaults:
+    _controller: '\Drupal\nodo_json_export\Controller\ExportController::exportHeader'
+    _title: 'Exportar Header a JSON'
+  requirements:
+    _permission: 'administer blocks'
+
+nodo_json_export.export_footer:
+  path: '/admin/structure/block/export-footer-json'
+  defaults:
+    _controller: '\Drupal\nodo_json_export\Controller\ExportController::exportFooter'
+    _title: 'Exportar Footer a JSON'
+  requirements:
+    _permission: 'administer blocks'
