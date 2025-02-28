@@ -13,39 +13,75 @@ class ExportController extends ControllerBase {
    */
   public function exportNode(NodeInterface $node) {
     $data = _custom_json_export_process_node($node);
-    $response = new JsonResponse($data);
+    $response = new JsonResponse($data ?: []);
     $this->addCorsHeaders($response);
     return $response;
   }
-
-  /**
-   * Exporta todos los bloques de header a JSON y los muestra en la URL.
-   */
-  public function exportHeader() {
-    $blocks = [];
-    $theme = $this->config('system.theme')->get('default');
-    $block_storage = \Drupal::entityTypeManager()->getStorage('block');
-    $header_blocks = $block_storage->loadByProperties([
+/**
+ * Exporta todos los bloques de header a JSON y los muestra en la URL.
+ */
+public function exportHeader() {
+  $theme = $this->config('system.theme')->get('default');
+  $block_storage = \Drupal::entityTypeManager()->getStorage('block');
+  
+  // Buscar el bloque site_branding para el logo
+  $branding_block = $block_storage->loadByProperties([
+    'theme' => $theme,
+    'plugin' => 'system_branding_block',
+    'region' => 'header',
+  ]);
+  
+  // Si no encuentra el bloque específico, buscar cualquier bloque en la región header
+  if (empty($branding_block)) {
+    $branding_block = $block_storage->loadByProperties([
       'theme' => $theme,
-      'region' => 'header',
+      'id' => 'olivero_site_branding',
     ]);
-
-    uasort($header_blocks, function ($a, $b) {
-      return $a->getWeight() - $b->getWeight();
-    });
-
-    foreach ($header_blocks as $block) {
-      $blocks[] = _custom_json_export_process_block($block);
-    }
-
-    $data = [
-      'section-header' => $blocks[0] ?? [],
-    ];
-
-    $response = new JsonResponse($data);
-    $this->addCorsHeaders($response);
-    return $response;
   }
+  
+  // Procesar el bloque para el header
+  $header_data = [];
+  if (!empty($branding_block)) {
+    $branding_block = reset($branding_block);
+    $header_data = _custom_json_export_process_block($branding_block);
+  } else {
+    // Crear un resultado por defecto si no se encuentra el bloque
+    $header_data = [
+      'logo' => [
+        'src' => '',
+        'alt' => 'WDARK Logo',
+      ],
+      'desktop-menu' => [],
+    ];
+    
+    // Cargar elementos del menú directamente
+    $menu_name = 'header-menu';
+    $menu_tree = \Drupal::menuTree()->load($menu_name, new \Drupal\Core\Menu\MenuTreeParameters());
+    $menu_items = [];
+    
+    foreach ($menu_tree as $menu_link) {
+      if (isset($menu_link->link)) {
+        $menu_items[] = [
+          'label' => strtoupper($menu_link->link->getTitle()),
+          'href' => $menu_link->link->getUrlObject()->toString(),
+        ];
+      }
+    }
+    
+    if (!empty($menu_items)) {
+      $header_data['desktop-menu'] = $menu_items;
+    }
+  }
+
+  $data = [
+    'section-header' => $header_data,
+  ];
+
+  $response = new JsonResponse($data);
+  $response->setPublic(); // Forzar acceso público para pruebas
+  $this->addCorsHeaders($response);
+  return $response;
+}
 
   /**
    * Exporta el bloque "Block footer" a JSON y lo muestra en la URL.
@@ -60,14 +96,14 @@ class ExportController extends ControllerBase {
 
     $footer_data = null;
     foreach ($footer_blocks as $block) {
-      if (stripos($block->label(), 'Block footer') !== false || $block->id() === 'block_footer') {
+      if ($block->id() === 'block-olivero-blockfooter') {
         $footer_data = _custom_json_export_process_block($block);
         break;
       }
     }
 
     $data = [
-      'section-footer' => $footer_data ?: $this->getDefaultFooter(),
+      'section-footer' => $footer_data ?: [],
     ];
 
     $response = new JsonResponse($data);
@@ -88,7 +124,10 @@ class ExportController extends ControllerBase {
 
     $data = [];
     foreach ($nodes as $node) {
-      $data[] = _custom_json_export_process_node($node);
+      $node_data = _custom_json_export_process_node($node);
+      if (!empty($node_data)) {
+        $data[] = $node_data;
+      }
     }
 
     $response = new JsonResponse($data);
@@ -100,31 +139,10 @@ class ExportController extends ControllerBase {
    * Agrega encabezados CORS y desactiva la caché en la respuesta.
    */
   private function addCorsHeaders(JsonResponse $response) {
-    $response->headers->set('Access-Control-Allow-Origin', '*');
-    $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Accept');
-    $response->headers->set('Access-Control-Max-Age', '3600');
+    $response->headers->set('Access-Control-Allow-Origin', '');
+    $response->headers->set('Access-Control-Allow-Methods', '');
+    $response->headers->set('Access-Control-Allow-Headers', '');
+    $response->headers->set('Access-Control-Max-Age', '');
     $response->headers->set('Cache-Control', 'no-cache, must-revalidate');
-  }
-
-  /**
-   * Proporciona un footer por defecto si no hay bloques.
-   */
-  private function getDefaultFooter() {
-    return [
-      'logo' => [
-        'src' => '/img/footer-logo.jpg',
-        'alt' => 'WDARK Footer Logo',
-      ],
-      'social-networks' => [
-        ['name' => 'Facebook', 'url' => 'https://facebook.com'],
-        ['name' => 'Instagram', 'url' => 'https://instagram.com'],
-      ],
-      'copyright' => '© Web & Digital Ark SAS 2019',
-      'motto' => [
-        'main' => 'CREANDO MUNDOS',
-        'secondary' => 'CONECTANDO REALIDADES',
-      ],
-    ];
   }
 }
