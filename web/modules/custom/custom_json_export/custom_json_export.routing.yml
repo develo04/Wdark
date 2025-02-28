@@ -34,3 +34,11 @@ custom_json_export.export_nodes:
     _title: 'JSON de Todos los Nodos'
   requirements:
     _permission: 'RestPermissions'
+
+custom_json_export.export_blocks:
+  path: '/test/blocks'
+  defaults:
+    _controller: '\Drupal\custom_json_export\Controller\BlockInfoController::content'
+    _title: 'JSON de Todos los bloques'
+  requirements:
+    _permission: 'RestPermissions'
