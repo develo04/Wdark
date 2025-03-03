@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.blog.field_auth_position
     - field.field.node.blog.field_categories
     - field.field.node.blog.field_full_html_text
+    - field.field.node.blog.field_labels
     - field.field.node.blog.field_logo_wdark
     - field.field.node.blog.field_principal_image_blog
     - field.field.node.blog.field_subtitle
@@ -74,6 +75,14 @@ content:
     settings: {  }
     third_party_settings: {  }
     weight: 2
+    region: content
+  field_labels:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 10
     region: content
   field_logo_wdark:
     type: entity_reference_entity_view

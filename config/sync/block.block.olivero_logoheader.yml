@@ -1,0 +1,25 @@
+uuid: b320a1ea-85a5-424a-9688-d4ff34d8ef45
+langcode: es
+status: true
+dependencies:
+  content:
+    - 'block_content:logo_header:f09fb261-9ebb-476e-9692-01eb2181c07c'
+  module:
+    - block_content
+  theme:
+    - olivero
+id: olivero_logoheader
+theme: olivero
+region: header
+weight: -6
+provider: null
+plugin: 'block_content:f09fb261-9ebb-476e-9692-01eb2181c07c'
+settings:
+  id: 'block_content:f09fb261-9ebb-476e-9692-01eb2181c07c'
+  label: 'Logo header'
+  label_display: '0'
+  provider: block_content
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

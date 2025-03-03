@@ -11,6 +11,6 @@ features:
   favicon: true
   node_user_picture: true
 logo:
-  path: 'public://wdlogo_webpagecomplete128px.png'
+  path: 'public://wdlogo2020_black800px.png'
   url: null
   use_default: false

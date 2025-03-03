@@ -1,0 +1,23 @@
+uuid: 802c58a2-6e11-4a40-9058-03aa35a9974d
+langcode: es
+status: true
+dependencies:
+  config:
+    - block_content.type.logo_header
+    - field.field.block_content.logo_header.field_imagen
+id: block_content.logo_header.default
+targetEntityType: block_content
+bundle: logo_header
+mode: default
+content:
+  field_imagen:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  langcode: true

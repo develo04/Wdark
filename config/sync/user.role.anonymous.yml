@@ -8,6 +8,7 @@ dependencies:
   module:
     - comment
     - contact
+    - custom_json_export
     - filter
     - media
     - search
@@ -19,6 +20,7 @@ label: 'Usuario anónimo'
 weight: 0
 is_admin: false
 permissions:
+  - RestPermissions
   - 'access comments'
   - 'access content'
   - 'access site-wide contact form'

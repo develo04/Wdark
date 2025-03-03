@@ -1,0 +1,8 @@
+uuid: b7a93908-4bf3-4a72-8859-687e4de2942d
+langcode: es
+status: true
+dependencies: {  }
+id: footer
+label: Footer
+revision: false
+description: null

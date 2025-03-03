@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.blog.field_auth_position
     - field.field.node.blog.field_categories
     - field.field.node.blog.field_full_html_text
+    - field.field.node.blog.field_labels
     - field.field.node.blog.field_logo_wdark
     - field.field.node.blog.field_principal_image_blog
     - field.field.node.blog.field_subtitle
@@ -54,6 +55,16 @@ content:
     region: content
     settings:
       rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_labels:
+    type: entity_reference_autocomplete
+    weight: 26
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
       placeholder: ''
     third_party_settings: {  }
   field_logo_wdark:

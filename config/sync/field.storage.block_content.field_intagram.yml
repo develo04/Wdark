@@ -1,0 +1,19 @@
+uuid: 7d3bbd47-dd50-4b86-8205-a32b43d5baa0
+langcode: es
+status: true
+dependencies:
+  module:
+    - block_content
+    - link
+id: block_content.field_intagram
+field_name: field_intagram
+entity_type: block_content
+type: link
+settings: {  }
+module: link
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

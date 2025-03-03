@@ -1,0 +1,19 @@
+uuid: c74e746d-0b25-4017-9866-9d2b15fb5126
+langcode: es
+status: true
+dependencies:
+  config:
+    - block_content.type.footer
+    - field.storage.block_content.field_main
+id: block_content.footer.field_main
+field_name: field_main
+entity_type: block_content
+bundle: footer
+label: main
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
