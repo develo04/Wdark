@@ -92,39 +92,157 @@ class BlockInfoController extends ControllerBase {
   public function content() {
     $all_blocks = $this->getBlocksByRegion();
     
-    // Filtrar las regiones 'header', 'footer_top' y 'footer_bottom'
-    $filtered_blocks = [];
-    
+    // Estructura base del JSON
+    $result = [
+      'section-header' => [
+        'logo' => [
+          'src' => '',
+          'alt' => ''
+        ],
+        'desktop-menu' => []
+      ],
+      'section-footer' => [
+        'logo' => [
+          'src' => '',
+          'alt' => ''
+        ],
+        'social-networks' => [],
+        'copyright' => '',
+        'motto' => [
+          'main' => '',
+          'secondary' => ''
+        ]
+      ]
+    ];
+  
+    // Procesar Header
     if (isset($all_blocks['header'])) {
-      $filtered_blocks['header'] = $all_blocks['header'];
-    }
-    
-    if (isset($all_blocks['footer_top'])) {
-      $filtered_blocks['footer_top'] = $all_blocks['footer_top'];
-    }
-    
-    if (isset($all_blocks['footer_bottom'])) {
-      $filtered_blocks['footer_bottom'] = $all_blocks['footer_bottom'];
-    }
-    
-    // Opcionalmente, puedes agrupar ambas regiones de footer en una sola
-    // si deseas mantener la estructura original esperada
-    $filtered_blocks['footer'] = [];
-    if (isset($all_blocks['footer_top'])) {
-      foreach ($all_blocks['footer_top'] as $block) {
-        $block['region_original'] = 'footer_top';
-        $filtered_blocks['footer'][] = $block;
+      foreach ($all_blocks['header'] as $block) {
+        // Procesar logo (campo field_imagen o cualquier campo de imagen)
+        if ($block['plugin_id'] === 'block_content:f09fb261-9ebb-476e-9692-01eb2181c07c') { // Logo header
+          $this->processImageFieldForBlock($block, 'section-header', 'logo');
+        }
+        // Procesar menú (si es un bloque de menú)
+        if ($block['plugin_id'] === 'system_menu_block:header-menu') {
+          $menu_items = [];
+          foreach ($block['content']['menu']['items'] as $item) {
+            $menu_items[] = [
+              'label' => $item['title'],
+              'href' => $item['url']
+            ];
+          }
+          $result['section-header']['desktop-menu'] = $menu_items;
+        }
+        // Procesar otros campos genéricos del bloque
+        if (!empty($block['content']['fields'])) {
+          foreach ($block['content']['fields'] as $field_name => $field_value) {
+            if (!in_array($field_name, ['status', 'reusable', 'revision_default'])) { // Excluir campos internos
+              $result['section-header'][$field_name] = $this->processGenericField($field_value);
+            }
+          }
+        }
       }
     }
-    
-    if (isset($all_blocks['footer_bottom'])) {
-      foreach ($all_blocks['footer_bottom'] as $block) {
-        $block['region_original'] = 'footer_bottom';
-        $filtered_blocks['footer'][] = $block;
+  
+    // Procesar Footer (combinando footer_top y footer_bottom si existen)
+    $footer_blocks = array_merge($all_blocks['footer_top'] ?? [], $all_blocks['footer_bottom'] ?? []);
+    foreach ($footer_blocks as $block) {
+      if ($block['plugin_id'] === 'block_content:fff02ce1-5a8d-44f9-8287-f740997928c9') { // Footer
+        // Procesar logo (campo field_logo o cualquier campo de imagen)
+        $this->processImageFieldForBlock($block, 'section-footer', 'logo');
+        
+        // Procesar redes sociales y otros campos dinámicamente
+        if (!empty($block['content']['fields'])) {
+          foreach ($block['content']['fields'] as $field_name => $field_value) {
+            if (!in_array($field_name, ['status', 'reusable', 'revision_default'])) { // Excluir campos internos
+              if (strpos($field_name, 'field_') === 0) { // Solo procesar campos personalizados (empezando con "field_")
+                if ($field_name === 'field_copyright') {
+                  $result['section-footer']['copyright'] = $this->processGenericField($field_value)[0]['value'] ?? '';
+                } elseif ($field_name === 'field_main') {
+                  $result['section-footer']['motto']['main'] = $this->processGenericField($field_value)[0]['value'] ?? '';
+                } elseif ($field_name === 'field_secondary') {
+                  $result['section-footer']['motto']['secondary'] = $this->processGenericField($field_value)[0]['value'] ?? '';
+                } elseif (strpos($field_name, 'field_') === 0 && $field_name !== 'field_logo') { // Campos de redes sociales u otros
+                  $processed_value = $this->processGenericField($field_value);
+                  if (!empty($processed_value)) {
+                    $social_networks = [];
+                    foreach ($processed_value as $item) {
+                      if (isset($item['title']) && isset($item['url'])) {
+                        $social_networks[] = [
+                          'name' => $item['title'],
+                          'url' => $item['url']
+                        ];
+                      }
+                    }
+                    if (!empty($social_networks)) {
+                      $result['section-footer']['social-networks'] = array_merge($result['section-footer']['social-networks'], $social_networks);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
-    
-    return new JsonResponse($filtered_blocks);
+  
+    // Filtrar valores vacíos o nulos
+    $result = array_map(function ($section) {
+      return array_filter($section, function ($value) {
+        return !empty($value) || (is_array($value) && count(array_filter($value)) > 0);
+      });
+    }, $result);
+  
+    return new JsonResponse($result);
+  }
+  
+  /**
+   * Procesa un campo de imagen para un bloque y lo asigna a la sección correspondiente.
+   */
+  protected function processImageFieldForBlock($block, $section, $key) {
+    if (!empty($block['content']['fields'])) {
+      foreach ($block['content']['fields'] as $field_name => $field_value) {
+        if (strpos($field_name, 'field_') === 0 && !empty($field_value[0])) { // Solo campos personalizados
+          $media_id = $field_value[0]['id'] ?? null;
+          if ($media_id) {
+            $media = $this->entityTypeManager->getStorage('media')->load($media_id);
+            if ($media && $media->hasField('field_media_image') && !$media->get('field_media_image')->isEmpty()) {
+              $file = \Drupal\file\Entity\File::load($media->get('field_media_image')->target_id);
+              if ($file) {
+                $this->$section[$key] = [
+                  'src' => \Drupal::service('file_url_generator')->generateString($file->getFileUri()),
+                  'alt' => $field_value[0]['label'] ?? ''
+                ];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /**
+   * Procesa un campo genérico y devuelve su valor en formato adecuado.
+   */
+  protected function processGenericField($field_value) {
+    $result = [];
+    if (!empty($field_value)) {
+      foreach ($field_value as $item) {
+        $processed_item = [];
+        if (isset($item['title']) && isset($item['url'])) {
+          $processed_item = [
+            'title' => $item['title'],
+            'url' => $item['url']
+          ];
+        } elseif (isset($item['value'])) {
+          $processed_item = ['value' => $item['value']];
+        }
+        if (!empty($processed_item)) {
+          $result[] = $processed_item;
+        }
+      }
+    }
+    return $result;
   }
 
   /**
