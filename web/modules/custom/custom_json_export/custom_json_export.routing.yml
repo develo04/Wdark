@@ -4,8 +4,8 @@ custom_json_export.export:
     _controller: '\Drupal\custom_json_export\Controller\ExportController::exportNode'
     _title: 'JSON del Nodo'
   requirements:
-    _permission: 'RestPermissions'
-    node: \d+
+    _access: 'TRUE'  # Cambiado de _permission a _access: 'TRUE' para acceso público
+    node: \d+  # Mantiene la validación del parámetro node
   options:
     parameters:
       node:
@@ -17,15 +17,15 @@ custom_json_export.export_header:
     _controller: '\Drupal\custom_json_export\Controller\ExportController::exportHeader'
     _title: 'JSON del Header'
   requirements:
-    _permission: 'RestPermissions'
-    
+    _access: 'TRUE'  # Cambiado a acceso público
+
 custom_json_export.export_footer:
   path: '/json/footer'
   defaults:
     _controller: '\Drupal\custom_json_export\Controller\ExportController::exportFooter'
     _title: 'JSON del Footer'
   requirements:
-    _permission: 'RestPermissions'
+    _access: 'TRUE'  # Cambiado a acceso público
 
 custom_json_export.export_nodes:
   path: '/json/nodes'
@@ -33,7 +33,7 @@ custom_json_export.export_nodes:
     _controller: '\Drupal\custom_json_export\Controller\ExportController::exportNodes'
     _title: 'JSON de Todos los Nodos'
   requirements:
-    _permission: 'RestPermissions'
+    _access: 'TRUE'  # Cambiado a acceso público
 
 custom_json_export.export_blocks:
   path: '/test/blocks'
@@ -41,4 +41,4 @@ custom_json_export.export_blocks:
     _controller: '\Drupal\custom_json_export\Controller\BlockInfoController::content'
     _title: 'JSON de Todos los bloques'
   requirements:
-    _permission: 'RestPermissions'
+    _access: 'TRUE'  # Cambiado a acceso público
