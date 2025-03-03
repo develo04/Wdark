@@ -365,22 +365,33 @@ function _custom_json_export_process_paragraph(Paragraph $paragraph) {
                 '@item_id' => $item->id(),
                 '@link_data' => var_export($link->toArray(), TRUE), // Usar toArray() para más detalles
               ]);
-              \Drupal::logger('custom_json_export')->notice('Valor de title en field_link: @title', [
-                '@title' => var_export($link->get('title')->getValue(), TRUE),
+              \Drupal::logger('custom_json_export')->notice('Valor de title en field_link (getTitle): @title', [
+                '@title' => var_export($link->getTitle(), TRUE),
+              ]);
+              \Drupal::logger('custom_json_export')->notice('Valor de title en field_link (getValue): @value_title', [
+                '@value_title' => var_export($link->getValue()[0]['title'] ?? null, TRUE),
               ]);
               \Drupal::logger('custom_json_export')->notice('Valor de uri en field_link: @uri', [
                 '@uri' => var_export($link->get('uri')->getValue(), TRUE),
               ]);
       
-              // Obtener el texto del enlace (title) para "value"
+              // Obtener el texto completo del enlace (title) para "value" usando la solución propuesta
               $link_title = '';
-              $link_value = $link->getValue();
-              if (!empty($link_value)) {
-                if (isset($link_value[0]['title'])) {
-                  $link_title = $link_value[0]['title'];
-                } elseif (!empty($link->get('title')->getValue())) {
-                  $link_title_value = $link->get('title')->getValue();
-                  $link_title = isset($link_title_value[0]['value']) ? $link_title_value[0]['value'] : (isset($link_title_value[0]) ? (string)$link_title_value[0] : '');
+              if ($link && method_exists($link, 'getTitle')) {
+                $link_title = $link->getTitle();
+              }
+      
+              // Si getTitle() no funcionó o devolvió un objeto, intentar con el array directamente
+              if (empty($link_title) || !is_string($link_title)) {
+                $link_value = $link->getValue();
+                if (!empty($link_value) && isset($link_value[0]['title'])) {
+                  $title_value = $link_value[0]['title'];
+                  // Asegurarnos de que obtenemos un string completo del objeto
+                  if (is_object($title_value) && method_exists($title_value, '__toString')) {
+                    $link_title = (string)$title_value;
+                  } elseif (is_string($title_value)) {
+                    $link_title = $title_value;
+                  }
                 }
               }
               $method['value'] = $link_title ?: '';
@@ -410,34 +421,6 @@ function _custom_json_export_process_paragraph(Paragraph $paragraph) {
           }
         }
         break;
-
-    default:
-      $result[$paragraph->getType()] = [];
-      foreach ($paragraph->getFields() as $field_name => $field) {
-        if (!in_array($field_name, ['id', 'uuid', 'revision_id', 'langcode', 'type', 'parent_id', 'parent_type', 'parent_field_name'])) {
-          if ($field->getFieldDefinition()->getType() === 'entity_reference_revisions' && $field->getSetting('target_type') === 'paragraph') {
-            $nested = [];
-            foreach ($field->referencedEntities() as $nested_paragraph) {
-              $nested_data = _custom_json_export_process_paragraph($nested_paragraph);
-              if ($nested_data) {
-                $nested[] = $nested_data;
-              }
-            }
-            if (!empty($nested)) {
-              $result[$paragraph->getType()][$field_name] = $nested;
-            }
-          } elseif ($field->getFieldDefinition()->getType() === 'image' && !$field->isEmpty()) {
-            $file = $field->entity;
-            $result[$paragraph->getType()][$field_name] = [
-              'src' => $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '',
-              'alt' => $field->alt ?: '',
-            ];
-          } elseif (!$field->isEmpty()) {
-            $result[$paragraph->getType()][$field_name] = $field->value ?: '';
-          }
-        }
-      }
-      break;
   }
 
   return $result;
