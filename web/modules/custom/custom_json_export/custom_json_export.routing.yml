@@ -11,22 +11,6 @@ custom_json_export.export:
       node:
         type: entity:node
 
-custom_json_export.export_header:
-  path: '/json/header'
-  defaults:
-    _controller: '\Drupal\custom_json_export\Controller\ExportController::exportHeader'
-    _title: 'JSON del Header'
-  requirements:
-    _permission: 'RestPermissions'
-    
-custom_json_export.export_footer:
-  path: '/json/footer'
-  defaults:
-    _controller: '\Drupal\custom_json_export\Controller\ExportController::exportFooter'
-    _title: 'JSON del Footer'
-  requirements:
-    _permission: 'RestPermissions'
-
 custom_json_export.export_nodes:
   path: '/json/nodes'
   defaults:

@@ -333,51 +333,83 @@ function _custom_json_export_process_paragraph(Paragraph $paragraph) {
       }
       break;
 
-    case 'component_find_us':
-      $result['section-contact'] = [
-        'title' => $paragraph->hasField('field_subtitle') ? $paragraph->get('field_subtitle')->value : '',
-        'contact-methods' => [],
-      ];
-      if ($paragraph->hasField('field_findus_item')) {
-        $methods = [];
-        foreach ($paragraph->get('field_findus_item')->referencedEntities() as $item) {
-          $method = [
-            'title' => $item->hasField('field_text') ? $item->get('field_text')->value : '',
-          ];
-          
-          if (stripos($method['title'], 'LLAMANOS') !== false || stripos($method['title'], 'LLÁMANOS') !== false) {
-            $method['type'] = 'phone';
-          } elseif (stripos($method['title'], 'UBICANOS') !== false || stripos($method['title'], 'UBÍCANOS') !== false) {
-            $method['type'] = 'location';
-          } elseif (stripos($method['title'], 'ESCRIBENOS') !== false || stripos($method['title'], 'ESCRÍBENOS') !== false) {
-            $method['type'] = 'email';
-          } else {
-            $method['type'] = '';
+      case 'component_find_us':
+        $result['section-contact'] = [
+          'title' => $paragraph->hasField('field_subtitle') ? $paragraph->get('field_subtitle')->value : '',
+          'contact-methods' => [],
+        ];
+        if ($paragraph->hasField('field_findus_item')) {
+          $methods = [];
+          foreach ($paragraph->get('field_findus_item')->referencedEntities() as $item) {
+            $method = [
+              'title' => $item->hasField('field_text') ? $item->get('field_text')->value : '',
+            ];
+            
+            // Determinar el tipo basado en el título
+            if (stripos($method['title'], 'LLAMANOS') !== false || stripos($method['title'], 'LLÁMANOS') !== false) {
+              $method['type'] = 'phone';
+            } elseif (stripos($method['title'], 'UBICANOS') !== false || stripos($method['title'], 'UBÍCANOS') !== false) {
+              $method['type'] = 'location';
+            } elseif (stripos($method['title'], 'ESCRIBENOS') !== false || stripos($method['title'], 'ESCRÍBENOS') !== false) {
+              $method['type'] = 'email';
+            } else {
+              $method['type'] = '';
+            }
+      
+            // Obtener el texto del enlace (title) para "value" y la URL para "link" (con depuración avanzada)
+            if ($item->hasField('field_link') && !$item->get('field_link')->isEmpty()) {
+              $link = $item->get('field_link')->first();
+              
+              // Depuración avanzada: registrar los datos completos de field_link
+              \Drupal::logger('custom_json_export')->notice('Datos completos de field_link para item @item_id: @link_data', [
+                '@item_id' => $item->id(),
+                '@link_data' => var_export($link->toArray(), TRUE), // Usar toArray() para más detalles
+              ]);
+              \Drupal::logger('custom_json_export')->notice('Valor de title en field_link: @title', [
+                '@title' => var_export($link->get('title')->getValue(), TRUE),
+              ]);
+              \Drupal::logger('custom_json_export')->notice('Valor de uri en field_link: @uri', [
+                '@uri' => var_export($link->get('uri')->getValue(), TRUE),
+              ]);
+      
+              // Obtener el texto del enlace (title) para "value"
+              $link_title = '';
+              $link_value = $link->getValue();
+              if (!empty($link_value)) {
+                if (isset($link_value[0]['title'])) {
+                  $link_title = $link_value[0]['title'];
+                } elseif (!empty($link->get('title')->getValue())) {
+                  $link_title_value = $link->get('title')->getValue();
+                  $link_title = isset($link_title_value[0]['value']) ? $link_title_value[0]['value'] : (isset($link_title_value[0]) ? (string)$link_title_value[0] : '');
+                }
+              }
+              $method['value'] = $link_title ?: '';
+      
+              // Obtener la URL del enlace para "link"
+              $method['link'] = $link->getUrl()->toString() ?: '';
+            } else {
+              $method['value'] = ''; // Valor por defecto si no hay enlace
+              $method['link'] = '';
+            }
+      
+            // Procesar la imagen (field_icon)
+            if ($item->hasField('field_icon') && !$item->get('field_icon')->isEmpty()) {
+              $icon = $item->get('field_icon')->referencedEntities()[0];
+              $file = File::load($icon->get('field_media_image')->target_id);
+              $method['image'] = $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '';
+            } else {
+              $method['image'] = '';
+            }
+      
+            if (!empty($method['type']) || !empty($method['title']) || !empty($method['value']) || !empty($method['image']) || !empty($method['link'])) {
+              $methods[] = $method;
+            }
           }
-
-          $method['value'] = $item->hasField('field_value') ? $item->get('field_value')->value : '';
-          if ($item->hasField('field_icon') && !$item->get('field_icon')->isEmpty()) {
-            $icon = $item->get('field_icon')->referencedEntities()[0];
-            $file = File::load($icon->get('field_media_image')->target_id);
-            $method['image'] = $file ? \Drupal::service('file_url_generator')->generateString($file->getFileUri()) : '';
-          } else {
-            $method['image'] = '';
-          }
-          if ($item->hasField('field_link') && !$item->get('field_link')->isEmpty()) {
-            $link = $item->get('field_link')->first();
-            $method['link'] = $link->getUrl()->toString() ?: '';
-          } else {
-            $method['link'] = '';
-          }
-          if (!empty($method['type']) || !empty($method['title']) || !empty($method['value']) || !empty($method['image']) || !empty($method['link'])) {
-            $methods[] = $method;
+          if (!empty($methods)) {
+            $result['section-contact']['contact-methods'] = $methods;
           }
         }
-        if (!empty($methods)) {
-          $result['section-contact']['contact-methods'] = $methods;
-        }
-      }
-      break;
+        break;
 
     default:
       $result[$paragraph->getType()] = [];
