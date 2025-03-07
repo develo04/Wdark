@@ -14,7 +14,6 @@ dependencies:
     - node.type.blog
   module:
     - field_group
-    - options
     - text
     - user
 third_party_settings:
@@ -63,11 +62,12 @@ content:
     weight: 9
     region: content
   field_categories:
-    type: list_default
-    label: hidden
-    settings: {  }
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
     third_party_settings: {  }
-    weight: 5
+    weight: 11
     region: content
   field_full_html_text:
     type: text_default

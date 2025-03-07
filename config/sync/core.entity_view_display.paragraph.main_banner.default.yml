@@ -1,16 +1,16 @@
-uuid: fbb2ad08-8960-4fac-936a-b6e0d35d0e2f
+uuid: 9375cb72-20d1-4879-b808-db76403b7de7
 langcode: es
 status: true
 dependencies:
   config:
-    - field.field.paragraph.title.field_subtitle
-    - field.field.paragraph.title.field_title
-    - paragraphs.paragraphs_type.title
+    - field.field.paragraph.main_banner.field_subtitle
+    - field.field.paragraph.main_banner.field_title
+    - paragraphs.paragraphs_type.main_banner
   module:
     - string_field_formatter
-id: paragraph.title.default
+id: paragraph.main_banner.default
 targetEntityType: paragraph
-bundle: title
+bundle: main_banner
 mode: default
 content:
   field_subtitle:
@@ -21,7 +21,7 @@ content:
       wrap_tag: h2
       wrap_class: ''
     third_party_settings: {  }
-    weight: 1
+    weight: 0
     region: content
   field_title:
     type: string

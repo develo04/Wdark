@@ -11,6 +11,7 @@ dependencies:
     - paragraphs.paragraphs_type.component_follow_us
     - paragraphs.paragraphs_type.componente_aliados
     - paragraphs.paragraphs_type.components
+    - paragraphs.paragraphs_type.main_banner
     - paragraphs.paragraphs_type.title
   module:
     - entity_reference_revisions
@@ -31,10 +32,11 @@ settings:
       component_follow_us: component_follow_us
       title: title
       component_find_us: component_find_us
-      cards: cards
       about_us: about_us
+      cards: cards
       button: button
       componente_aliados: componente_aliados
+      main_banner: main_banner
     negate: 0
     target_bundles_drag_drop:
       about_us:
@@ -72,6 +74,15 @@ settings:
         enabled: false
       follow_us_item:
         weight: 6
+        enabled: false
+      footer:
+        weight: 29
+        enabled: false
+      main_banner:
+        weight: 30
+        enabled: true
+      social_networks:
+        weight: 31
         enabled: false
       title:
         weight: 5

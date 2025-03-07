@@ -1,27 +1,17 @@
-uuid: b85be14f-c430-4a8c-8484-5d3c7326693b
+uuid: 301763a2-396d-4c6d-b08b-3d44e30c1f71
 langcode: es
 status: true
 dependencies:
   module:
     - node
-    - options
+    - taxonomy
 id: node.field_categories
 field_name: field_categories
 entity_type: node
-type: list_string
+type: entity_reference
 settings:
-  allowed_values:
-    -
-      value: creativity
-      label: Creatividad
-    -
-      value: drupal
-      label: Drupal
-    -
-      value: github
-      label: GitHub
-  allowed_values_function: ''
-module: options
+  target_type: taxonomy_term
+module: core
 locked: false
 cardinality: 1
 translatable: true

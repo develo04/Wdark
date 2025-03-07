@@ -3,23 +3,58 @@ langcode: es
 status: true
 dependencies:
   config:
+    - field.field.paragraph.about_us.field_cta_text
     - field.field.paragraph.about_us.field_full_html_field
     - field.field.paragraph.about_us.field_item_acerca_de_nosotros
+    - field.field.paragraph.about_us.field_subtitle
     - paragraphs.paragraphs_type.about_us
   module:
     - entity_reference_revisions
+    - field_group
+    - string_field_formatter
     - text
+third_party_settings:
+  field_group:
+    group_about_us:
+      children:
+        - field_item_acerca_de_nosotros
+        - field_full_html_field
+      label: 'About us'
+      parent_name: ''
+      region: content
+      weight: 2
+      format_type: html_element
+      format_settings:
+        classes: ''
+        show_empty_fields: false
+        id: ''
+        label_as_html: false
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
 id: paragraph.about_us.default
 targetEntityType: paragraph
 bundle: about_us
 mode: default
 content:
+  field_cta_text:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
   field_full_html_field:
     type: text_default
     label: hidden
     settings: {  }
     third_party_settings: {  }
-    weight: 1
+    weight: 3
     region: content
   field_item_acerca_de_nosotros:
     type: entity_reference_revisions_entity_view
@@ -27,6 +62,16 @@ content:
     settings:
       view_mode: default
       link: ''
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_subtitle:
+    type: plain_string_formatter
+    label: hidden
+    settings:
+      link_to_entity: false
+      wrap_tag: h2
+      wrap_class: ''
     third_party_settings: {  }
     weight: 0
     region: content
