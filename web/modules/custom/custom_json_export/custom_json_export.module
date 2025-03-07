@@ -214,6 +214,7 @@ function _custom_json_export_process_paragraph(Paragraph $paragraph) {
       }
       break;
 
+
     case 'button':
       if ($paragraph->hasField('field_link')) {
         $link = $paragraph->get('field_link')->first();
@@ -224,36 +225,40 @@ function _custom_json_export_process_paragraph(Paragraph $paragraph) {
       }
       break;
 
-    case 'about_us':
-      $result['section-about-us'] = [
-        'id' => '',
-        'title' => '',
-      ];
-      if ($paragraph->hasField('field_full_html_field')) {
-        $result['section-about-us']['description'] = strip_tags($paragraph->get('field_full_html_field')->value) ?: '';
-      }
-      if ($paragraph->hasField('field_item_acerca_de_nosotros')) {
-        $skills = [];
-        foreach ($paragraph->get('field_item_acerca_de_nosotros')->referencedEntities() as $item) {
-          $skills[] = [
-            'name' => $item->get('field_text')->value ?: '',
-            'percent' => $item->hasField('field_percentage') ? (int) $item->get('field_percentage')->value : 0,
-          ];
-        }
-        if (!empty($skills)) {
-          $result['section-about-us']['skills'] = [
-            'list' => array_column($skills, 'name'),
-            'percents' => array_column($skills, 'percent'),
-          ];
-        }
-      }
-      if ($paragraph->hasField('field_link')) {
-        $link = $paragraph->get('field_link')->first();
-        $result['section-about-us']['cta'] = [
-          'text' => $link->get('title')->getValue() ?: '',
+      case 'about_us':
+        $result['section-about-us'] = [
+          'id' => '',
+          'title' => $paragraph->hasField('field_subtitle') ? $paragraph->get('field_subtitle')->value : '',
         ];
-      }
-      break;
+        if ($paragraph->hasField('field_full_html_field')) {
+          $result['section-about-us']['description'] = strip_tags($paragraph->get('field_full_html_field')->value) ?: '';
+        }
+        // Agregamos la extracción del nuevo campo field_cta_text
+        if ($paragraph->hasField('field_cta_text')) {
+          $result['section-about-us']['cta_text'] = $paragraph->get('field_cta_text')->value ?: '';
+        }
+        if ($paragraph->hasField('field_item_acerca_de_nosotros')) {
+          $skills = [];
+          foreach ($paragraph->get('field_item_acerca_de_nosotros')->referencedEntities() as $item) {
+            $skills[] = [
+              'name' => $item->get('field_text')->value ?: '',
+              'percent' => $item->hasField('field_percentage') ? (int) $item->get('field_percentage')->value : 0,
+            ];
+          }
+          if (!empty($skills)) {
+            $result['section-about-us']['skills'] = [
+              'list' => array_column($skills, 'name'),
+              'percents' => array_column($skills, 'percent'),
+            ];
+          }
+        }
+        if ($paragraph->hasField('field_link')) {
+          $link = $paragraph->get('field_link')->first();
+          $result['section-about-us']['cta'] = [
+            'text' => $link->get('title')->getValue() ?: '',
+          ];
+        }
+        break;
 
     case 'cards':
       if ($paragraph->hasField('field_cards_item')) {
@@ -281,6 +286,24 @@ function _custom_json_export_process_paragraph(Paragraph $paragraph) {
         }
       }
       break;
+      case 'main_banner':
+        $result['section-main-banner'] = [
+          'id' => 'inicio',
+          'title' => $paragraph->hasField('field_title') ? $paragraph->get('field_title')->value : '',
+          'subtitle' => $paragraph->hasField('field_subtitle') ? $paragraph->get('field_subtitle')->value : '',
+        ];
+        break;
+  
+      case 'components':
+        if ($paragraph->hasField('field_components')) {
+          foreach ($paragraph->get('field_components')->referencedEntities() as $sub_paragraph) {
+            $sub_data = _custom_json_export_process_paragraph($sub_paragraph);
+            if ($sub_data) {
+              $result = array_merge($result, $sub_data);
+            }
+          }
+        }
+        break;
 
     case 'componente_aliados':
       $result['section-allies'] = [
