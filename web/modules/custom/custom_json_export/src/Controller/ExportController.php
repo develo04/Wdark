@@ -5,6 +5,8 @@ namespace Drupal\custom_json_export\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\node\NodeInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Drupal\taxonomy\Entity\Term;
 
 class ExportController extends ControllerBase {
 
@@ -16,15 +18,39 @@ class ExportController extends ControllerBase {
     $response = new JsonResponse($data ?: []);
     return $response;
   }
+
   /**
-   * Exporta todos los nodos del sitio a JSON y los muestra en la URL.
+   * Exporta todos los nodos del sitio a JSON y los muestra en la URL, con filtro opcional por categoría.
    */
-  public function exportNodes() {
+  public function exportNodes(Request $request) {
     $node_storage = \Drupal::entityTypeManager()->getStorage('node');
-    $nids = $node_storage->getQuery()
+    $query = $node_storage->getQuery()
       ->condition('status', 1)
-      ->accessCheck(TRUE)
-      ->execute();
+      ->accessCheck(TRUE);
+
+    // Obtener el parámetro de consulta 'category' si existe
+    $category = $request->query->get('category');
+
+    if (!empty($category)) {
+      // Cargar los términos de taxonomía 'categories' que coincidan con el valor proporcionado
+      $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+      $tids = $term_storage->getQuery()
+        ->condition('vid', 'categories') // Vocabulario 'categories'
+        ->condition('name', $category) // Nombre del término (Creatividad, Drupal, Github)
+        ->accessCheck(TRUE)
+        ->execute();
+
+      if (!empty($tids)) {
+        // Filtrar los nodos que referencian alguno de estos términos en field_categories
+        $query->condition('field_categories', array_values($tids), 'IN');
+      } else {
+        // Si no se encuentran términos, devolver un array vacío (sin nodos)
+        return new JsonResponse([]);
+      }
+    }
+
+    // Ejecutar la consulta
+    $nids = $query->execute();
     $nodes = $node_storage->loadMultiple($nids);
 
     $data = [];
