@@ -4,18 +4,18 @@
 
 # Pantheon commits a settings.php for environment-specific settings.
 # Place local settings in settings.local.php
-/web/sites/*/settings.local.php
-/web/sites/*/settings.env.php
-/web/sites/*/services*.yml
+backend/web/sites/*/settings.local.php
+backend/web/sites/*/settings.env.php
+backend/web/sites/*/services*.yml
 !/web/sites/*/services.pantheon.*.yml
 !/web/sites/*/services.yml
 ./.env
 # Ignore paths that contain user-generated content.
-/web/sites/*/files
-/web/sites/*/private
+backend/web/sites/*/files
+backend/web/sites/*/private
 
 # Ignore SimpleTest multi-site environment.
-/web/sites/simpletest
+backend/web/sites/simpletest
 
 
 # Ignore custom modules managed by Composer.
@@ -57,12 +57,12 @@
 # file.
 # ------------------------------------------------------------------
 /drush/Commands/contrib/
-/web/core/
-/web/modules/contrib/
-/web/themes/contrib/
-/web/profiles/contrib/
-/web/libraries/
-/web/private/scripts/quicksilver
+backend/web/core/
+backend/web/modules/contrib/
+backend/web/themes/contrib/
+backend/web/profiles/contrib/
+backend/web/libraries/
+backend/web/private/scripts/quicksilver
 
 
 # Generally you should only ignore the root vendor directory. It's important
@@ -87,7 +87,7 @@
 # files to other locations where it scaffolds files that are not
 # already ignored. We must also ignore these generated files.
 /web/**/.gitignore
-
+/.gitignore
 
 # Other common rules
 # ------------------
@@ -97,10 +97,10 @@
 # Ignore .env files as they are personal
 #/.env
 # Ignore folder node_modules into theme build scss
-/web/themes/custom/**/node_modules
-/web/themes/custom/**/node_modules
-/web/modules/Custom/map_function/node_modules/
-/web/modules/Custom/map_function/package-lock.json
+backend/web/themes/custom/**/node_modules
+backend/web/themes/custom/**/node_modules
+backend/web/modules/Custom/map_function/node_modules/
+backend/web/modules/Custom/map_function/package-lock.json
 #ignore DS_Store
 **/.DS_Store
 /lando.yml
