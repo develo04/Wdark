@@ -1,0 +1,449 @@
+/* [next]/internal/font/google/geist_7278d07b.module.css [app-client] (css) */
+@font-face {
+  font-family: Geist;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../media/gyByhwUxId8gMEwSGFWNOITddY4-s.81df3a5b.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Geist;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../media/gyByhwUxId8gMEwcGFWNOITd-s.p.da1ebef7.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Geist Fallback;
+  src: local(Arial);
+  ascent-override: 95.94%;
+  descent-override: 28.16%;
+  line-gap-override: 0.0%;
+  size-adjust: 104.76%;
+}
+
+.geist_7278d07b-module__j7z1Ra__className {
+  font-family: Geist, Geist Fallback;
+  font-style: normal;
+}
+
+.geist_7278d07b-module__j7z1Ra__variable {
+  --font-geist-sans: "Geist", "Geist Fallback";
+}
+
+
+/* [next]/internal/font/google/geist_mono_719fb246.module.css [app-client] (css) */
+@font-face {
+  font-family: Geist Mono;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../media/or3nQ6H_1_WfwkMZI_qYFrkdmhHkjkotbA-s.e32db976.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304, U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: Geist Mono;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../media/or3nQ6H_1_WfwkMZI_qYFrcdmhHkjko-s.p.be19f591.woff2") format("woff2");
+  unicode-range: U+??, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Geist Mono Fallback;
+  src: local(Arial);
+  ascent-override: 74.67%;
+  descent-override: 21.92%;
+  line-gap-override: 0.0%;
+  size-adjust: 134.59%;
+}
+
+.geist_mono_719fb246-module__quwlgG__className {
+  font-family: Geist Mono, Geist Mono Fallback;
+  font-style: normal;
+}
+
+.geist_mono_719fb246-module__quwlgG__variable {
+  --font-geist-mono: "Geist Mono", "Geist Mono Fallback";
+}
+
+
+/* [project]/src/app/globals.css [app-client] (css) */
+:root {
+  --background: #fff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+.about-us, .services-help-items {
+  background-color: #fff;
+}
+
+.our-allies-wda {
+  background-color: #f8f8f8;
+}
+
+.find-us {
+  background-color: #000;
+}
+
+.site-footer {
+  background-color: #1d1d1d;
+}
+
+.navbar-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transition: all .3s;
+  z-index: 1000;
+  background-color: #0000;
+}
+
+.navbar-header.scrolled .navbar-container {
+  background-color: #000000e6;
+  box-shadow: 0 2px 10px #0000001a;
+  transition: all .5s ease-in-out .5s;
+}
+
+.navbar-header.scrolled .desktop-menu a, .navbar-header.scrolled .desktop-menu li {
+  color: #00b7ff;
+}
+
+.navbar-header {
+  width: 100%;
+  color: #fff;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  width: 100%;
+  z-index: 99999;
+}
+
+.logo-header {
+  display: flex;
+  align-items: center;
+}
+
+.desktop-menu {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.desktop-menu li a {
+  text-decoration: none;
+  color: #0ff;
+  font-weight: 500;
+  transition: color .3s;
+}
+
+.desktop-menu li a:hover {
+  color: #fff;
+}
+
+.desktop-menu li:first-child a {
+  position: relative;
+}
+
+.desktop-menu li:first-child a:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 40px;
+  height: 2px;
+  background: #fff;
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.mobile-menu {
+  position: absolute;
+  top: 80px;
+  right: 0;
+  background: #000000f2;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  transition: height .4s;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mobile-menu.open {
+  height: 350px;
+}
+
+.mobile-menu li {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.mobile-menu li a {
+  text-decoration: none;
+  color: #0ff;
+  font-size: 1.2rem;
+}
+
+.mobile-menu li a:hover {
+  color: #fff;
+}
+
+@media (width <= 1024px) {
+  .desktop-menu {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+}
+
+body {
+  background-image: url("../media/rick.302b8229.gif");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+.banner-home {
+  padding: 120px 15px 215px;
+}
+
+.banner-home-image-and-description {
+  text-align: center;
+}
+
+.banner-home-image-and-description .banner-title, .banner-subtitle {
+  font-size: 2em;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.banner-subtitle {
+  color: #0ff;
+}
+
+.button-see-more-banner {
+  border: 2px solid #0ff;
+  background: none;
+  -webkit-transition: all .2sease-out 0s;
+  -o-transition: all .2s ease-out 0s;
+  transition: all .2sease-out 0s;
+  min-height: 0;
+  min-width: 0;
+  line-height: 15px;
+  border-width: 2px;
+  margin: 0;
+  padding: 7px 33px;
+  letter-spacing: 1px;
+  font-size: 15px;
+  color: #0ff;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.services-help-title {
+  margin: 25% 0;
+  text-align: center;
+}
+
+.services-help-title h2, h4 {
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.services-help-title h2 {
+  text-transform: uppercase;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.about-us {
+  color: #000;
+}
+
+.services-help-items {
+  color: #000;
+}
+
+.flip {
+  position: relative;
+}
+
+.flip > .front, .flip > .back {
+  display: block;
+  transition-timing-function: cubic-bezier(.175, .885, .32, 1.275);
+  transition-duration: .5s;
+  transition-property: transform, opacity;
+}
+
+.flip > .front {
+  transform: rotateY(0);
+}
+
+.flip > .back {
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotateY(-180deg);
+}
+
+.flip:hover > .front {
+  transform: rotateY(180deg);
+}
+
+.flip:hover > .back {
+  opacity: 1;
+  transform: rotateY(0);
+}
+
+.flip.flip-vertical > .back {
+  transform: rotateX(-180deg);
+}
+
+.flip.flip-vertical:hover > .front {
+  transform: rotateX(180deg);
+}
+
+.flip.flip-vertical:hover > .back {
+  transform: rotateX(0);
+}
+
+.flip {
+  position: relative;
+  display: inline-block;
+  margin-right: 2px;
+  width: 100%;
+  height: 100%;
+}
+
+.flip > .front, .flip > .back {
+  display: block;
+  color: #fff;
+  width: inherit;
+  padding: 1em 2em;
+  height: 100%;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.text-shadow {
+  text-shadow: 1px 1px #0000000a, 2px 2px #0000000a, 3px 3px #0000000a, 4px 4px #0000000a, .125rem .125rem #0000000a, 6px 6px #0000000a, 7px 7px #0000000a, 8px 8px #0000000a, 9px 9px #0000000a, .3125rem .3125rem #0000000a, 11px 11px #0000000a, 12px 12px #0000000a, 13px 13px #0000000a, 14px 14px #0000000a, .625rem .625rem #0000000a, 16px 16px #0000000a, 17px 17px #0000000a, 18px 18px #0000000a, 19px 19px #0000000a, 1.25rem 1.25rem #0000000a;
+}
+
+.services-help-item {
+  height: 265px;
+  width: 100%;
+}
+
+[class^="services-help-item-"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+[class^="services-help-item-"] h3 {
+  color: #1d1d1d;
+}
+
+[class^="services-help-item-"][class*="-join-us"] a {
+  color: #006;
+  border: 1px solid #006;
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  background-color: #0000;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: .25rem;
+}
+
+[class^="services-help-item-"][class*="-join-us"] a:hover {
+  color: #fff;
+  background-color: #006;
+  border: 1px solid #006;
+}
+
+[class^="services-help-item-"][class*="-description"] p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #777;
+}
+
+
+/*# sourceMappingURL=%5Broot%20of%20the%20server%5D__36bd7e._.css.map*/

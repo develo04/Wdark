@@ -1,0 +1,25 @@
+/* [project]/src/app/square721btroman_d2b02d69.module.css [app-client] (css) */
+@font-face {
+  font-family: square721BTRoman;
+  src: url("/_next/static/media/Square721BTRoman-s.p.2d59bfec.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: square721BTRoman Fallback;
+  src: local(Arial);
+  ascent-override: 90.92%;
+  descent-override: 21.65%;
+  line-gap-override: 0.0%;
+  size-adjust: 108.91%;
+}
+
+.square721btroman_d2b02d69-module__XLCBGa__className {
+  font-family: square721BTRoman, square721BTRoman Fallback;
+}
+
+.square721btroman_d2b02d69-module__XLCBGa__variable {
+  --font-square721: "square721BTRoman", "square721BTRoman Fallback";
+}
+
+/*# sourceMappingURL=src_app_square721btroman_d2b02d69_module_b52d8e.css.map*/

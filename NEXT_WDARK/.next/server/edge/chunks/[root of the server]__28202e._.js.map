@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 23, "column": 0}, "map": {"version":3,"sources":["turbopack://[project]/middleware.js"],"sourcesContent":["import { NextResponse } from \"next/server\";\r\n\r\nexport function middleware(req) {\r\n  const url = req.nextUrl;\r\n\r\n  // Redirige \"/blog/node/1\" a \"/blog\"\r\n  if (url.pathname === \"/blog/node/1\") {\r\n    return NextResponse.redirect(new URL(\"/blog\", req.url));\r\n  }\r\n\r\n  // Permite el acceso a otras rutas\r\n  return NextResponse.next();\r\n}\r\n\r\nexport const config = {\r\n  matcher: \"/blog/node/:path*\",\r\n};\r\n"],"names":[],"mappings":";;;;AAAA;AAAA;;AAEO,SAAS,WAAW,GAAG;IAC5B,MAAM,MAAM,IAAI,OAAO;IAEvB,oCAAoC;IACpC,IAAI,IAAI,QAAQ,KAAK,gBAAgB;QACnC,OAAO,qLAAA,CAAA,eAAY,CAAC,QAAQ,CAAC,IAAI,IAAI,SAAS,IAAI,GAAG;IACvD;IAEA,kCAAkC;IAClC,OAAO,qLAAA,CAAA,eAAY,CAAC,IAAI;AAC1B;AAEO,MAAM,SAAS;IACpB,SAAS;AACX"}},
+    {"offset": {"line": 42, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
+}
