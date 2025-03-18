@@ -16,29 +16,42 @@ export default function FindUs() {
         if (!response.ok) {
           throw new Error(`Error en la respuesta: ${response.status}`);
         }
-
+  
         const data = await response.json();
-
+  
         // Buscar la sección "section-contact" dentro de field_componentes
-        const contactSection = data.fields.field_componentes.find(
-          component => component["section-contact"]
-        );
-        
-        if (contactSection && contactSection["section-contact"]) {
-          setContactMethods(contactSection["section-contact"]["contact-methods"] || []);
-          setContactTitle(contactSection["section-contact"].title || "ENCUÉNTRANOS");
-        } else {
+        if (data.fields && data.fields.field_componentes) {
+          // Recorrer todos los componentes principales
+          for (const component of data.fields.field_componentes) {
+            // Verifica si tiene la propiedad components
+            if (component.components && Array.isArray(component.components)) {
+              // Busca en el array de components el que tenga section-contact directamente
+              const contactComponent = component.components.find(
+                item => item["section-contact"]
+              );
+              
+              if (contactComponent && contactComponent["section-contact"]) {
+                setContactMethods(contactComponent["section-contact"]["contact-methods"] || []);
+                setContactTitle(contactComponent["section-contact"].title || "ENCUÉNTRANOS");
+                setIsLoading(false);
+                return; // Termina la función una vez encontramos los datos
+              }
+            }
+          }
+          
+          // Si llegamos aquí, no encontramos la sección
           throw new Error("No se encontró la sección 'section-contact' o está vacía");
+        } else {
+          throw new Error("No se encontró la estructura esperada en los datos");
         }
-
-        setIsLoading(false);
+        
       } catch (err) {
         console.error("Error al obtener los datos:", err);
         setError(err.message);
         setIsLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
 

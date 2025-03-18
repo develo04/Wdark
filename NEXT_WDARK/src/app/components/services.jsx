@@ -22,22 +22,29 @@ export default function Services() {
         
         // Buscar la sección services dentro de fields.field_componentes
         if (data.fields && data.fields.field_componentes) {
-          // Encuentra el objeto que contiene section-services
-          const servicesComponent = data.fields.field_componentes.find(
-            component => component["section-services"]
-          );
-          
-          if (servicesComponent && servicesComponent["section-services"] && 
-              servicesComponent["section-services"].services) {
-            setServices(servicesComponent["section-services"].services);
-          } else {
-            throw new Error("No se encontró la sección 'section-services' o no contiene servicios");
+          // Recorre todos los componentes principales
+          for (const component of data.fields.field_componentes) {
+            // Verifica si tiene la propiedad components
+            if (component.components && Array.isArray(component.components)) {
+              // Busca en el array de components el que tenga section-services directamente
+              const servicesComponent = component.components.find(
+                item => item["section-services"]
+              );
+              
+              if (servicesComponent && servicesComponent["section-services"] && 
+                  servicesComponent["section-services"].services) {
+                setServices(servicesComponent["section-services"].services);
+                setIsLoading(false);
+                return; // Termina la función una vez encontramos los datos
+              }
+            }
           }
+          
+          // Si llegamos aquí, no encontramos la sección
+          throw new Error("No se encontró la sección 'section-services' o no contiene servicios");
         } else {
           throw new Error("No se encontró la estructura esperada en los datos");
         }
-        
-        setIsLoading(false);
       } catch (err) {
         console.error("Error al obtener los datos:", err);
         setError(err.message);

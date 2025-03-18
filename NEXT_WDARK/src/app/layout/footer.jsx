@@ -30,7 +30,6 @@ export default function Footer() {
   }, []);
 
   if (loading) return <footer className="site-footer"></footer>;
-  if (error) return <footer className="site-footer">Error al cargar el footer: {error}</footer>;
   if (!footerData) return null;
 
   const { "section-footer": sectionFooter } = footerData;

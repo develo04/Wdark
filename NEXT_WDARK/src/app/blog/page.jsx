@@ -28,6 +28,18 @@ export default function BlogHome() {
     return words.slice(0, wordCount).join(" ") + (words.length > wordCount ? "..." : "");
   };
 
+  // Función para normalizar y eliminar espacios en strings
+  const normalizeString = (str) => {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Eliminar tildes
+      .replace(/[^\w\s]/gi, "") // Eliminar caracteres especiales
+      .replace(/\s+/g, "") // Eliminar todos los espacios
+      .trim(); // Eliminar espacios al inicio y al final
+  };
+
   useEffect(() => {
     const fetchBlogData = async () => {
       try {
@@ -39,7 +51,8 @@ export default function BlogHome() {
         }
 
         const data = await response.json();
-        const filteredData = Array.isArray(data) ? data.filter((item) => item.nid !== "1") : [];
+        // Filtra por tipo "blog" en lugar de excluir nid "1"
+        const filteredData = Array.isArray(data) ? data.filter((item) => item.type === "blog") : [];
         setBlogData(filteredData);
 
         const categories = Array.from(
@@ -62,22 +75,18 @@ export default function BlogHome() {
     fetchBlogData();
   }, []);
 
-  // MODIFICADO: La función handleArticleClick ahora incluye el nid en la URL
+  // MODIFICADO: La función handleArticleClick ahora elimina los espacios en la URL
   const handleArticleClick = (blog) => {
     const category = blog.fields?.field_categories?.[0]?.label || "sin-categoria";
     const title = blog.title;
-    const nid = blog.nid; // Capturamos el nid del blog
+    const nid = blog.nid;
 
-    const normalizedCategory = category.toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s]/gi, '');
+    // Usar la función normalizeString para eliminar espacios
+    const normalizedCategory = normalizeString(category);
+    const normalizedTitle = normalizeString(title);
 
-    const normalizedTitle = title.toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s]/gi, '');
-
-    // Incluimos el nid como parámetro de consulta
-    router.push(`/blog/${encodeURIComponent(normalizedCategory)}/${encodeURIComponent(normalizedTitle)}?nid=${nid}`);
+    // Construir la URL sin espacios
+    router.push(`/blog/${normalizedCategory}/${normalizedTitle}?nid=${nid}`);
   };
 
   const handleCategorySelect = (category) => {

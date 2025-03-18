@@ -79,7 +79,7 @@ export default function InternalBlog() {
         // Use the filtered nodes data we already have
         if (filteredNodes.length === 0) throw new Error("No hay blogs disponibles");
 
-        // Normalizar cadenas para comparación - DEBE COINCIDIR con el proceso en BlogHome
+        // Normalizar cadenas para comparación - MODIFICADO para eliminar espacios completamente
         const normalizeString = (str) => {
           if (!str) return '';
           return str
@@ -87,7 +87,7 @@ export default function InternalBlog() {
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "") // Eliminar tildes
             .replace(/[^\w\s]/gi, "") // Eliminar caracteres especiales
-            .replace(/\s+/g, " ") // Reemplazar múltiples espacios por uno solo
+            .replace(/\s+/g, "") // Eliminar todos los espacios
             .trim(); // Eliminar espacios al inicio y al final
         };
 
@@ -177,8 +177,9 @@ export default function InternalBlog() {
 
         // Actualizar la URL para reflejar correctamente el blog que estamos viendo
         if (process.env.NODE_ENV === 'development' && (!categoriaParam || !tituloParam)) {
-          const categorySlug = encodeURIComponent(blogDetails.fields?.field_categories?.[0]?.label || '');
-          const titleSlug = encodeURIComponent(blogDetails.title || '');
+          // Usar normalizeString para eliminar espacios en la URL
+          const categorySlug = encodeURIComponent(normalizeString(blogDetails.fields?.field_categories?.[0]?.label || ''));
+          const titleSlug = encodeURIComponent(normalizeString(blogDetails.title || ''));
           
           // Actualiza URL sin refrescar la página
           window.history.replaceState(
@@ -197,6 +198,18 @@ export default function InternalBlog() {
 
     fetchBlogData();
   }, [categoriaParam, tituloParam, nidParam]);
+
+  // Función para generar slugs sin espacios
+  const generateSlug = (text) => {
+    if (!text) return '';
+    return text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s]/gi, "")
+      .replace(/\s+/g, "") // Eliminar espacios
+      .trim();
+  };
 
   const handleCategoryClick = (category) => {
     router.push(`/blog?category=${encodeURIComponent(category)}`);

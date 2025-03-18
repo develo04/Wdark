@@ -13,23 +13,37 @@ export default function Allies() {
     const fetchAllies = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/json/node/1`);
-
+  
         if (!response.ok) {
           throw new Error(`Error en la respuesta: ${response.status}`);
         }
-
+  
         const data = await response.json();
         
         // Buscar la sección "section-allies" dentro de field_componentes
-        const alliesSection = data.fields.field_componentes.find(
-          component => component["section-allies"]
-        );
-        
-        if (alliesSection && alliesSection["section-allies"]) {
-          setAllies(alliesSection["section-allies"].allies || []);
-          setTitle(alliesSection["section-allies"].title || "");
+        if (data.fields && data.fields.field_componentes) {
+          // Recorrer todos los componentes principales
+          for (const component of data.fields.field_componentes) {
+            // Verifica si tiene la propiedad components
+            if (component.components && Array.isArray(component.components)) {
+              // Busca en el array de components el que tenga section-allies directamente
+              const alliesComponent = component.components.find(
+                item => item["section-allies"]
+              );
+              
+              if (alliesComponent && alliesComponent["section-allies"]) {
+                setAllies(alliesComponent["section-allies"].allies || []);
+                setTitle(alliesComponent["section-allies"].title || "");
+                setIsLoading(false);
+                return; // Termina la función una vez encontramos los datos
+              }
+            }
+          }
+          
+          // Si llegamos aquí, no encontramos la sección
+          throw new Error("No se encontró la sección 'section-allies'");
         } else {
-          throw new Error("No se encontró la sección 'section-allies'.");
+          throw new Error("No se encontró la estructura esperada en los datos");
         }
       } catch (err) {
         console.error("Error al obtener los aliados:", err);
@@ -38,7 +52,7 @@ export default function Allies() {
         setIsLoading(false);
       }
     };
-
+  
     fetchAllies();
   }, []);
 
