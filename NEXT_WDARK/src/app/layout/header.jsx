@@ -159,21 +159,13 @@ export default function Header() {
     </div>
   );
 
-  // Función para manejar enlaces de navegación con prefijo de idioma
-  const getLocalizedHref = (href) => {
-    if (href.startsWith(`/${currentLanguage}/`) || href.startsWith('http')) {
-      return href;
-    }
-    
-    const cleanHref = href.startsWith('/') ? href.substring(1) : href;
-    return `/${currentLanguage}/${cleanHref}`;
-  };
+
 
   return (
     <header className={`navbar-header ${scrolled ? 'scrolled' : ''}`}>
       <nav className="navbar-container">
         {/* Logo */}
-        <Link href={`/${currentLanguage}`} className="logo-header">
+        <Link href={`/`} className="logo-header">
           {headerData.logo.src ? (
             <Image 
               src={`${process.env.NEXT_PUBLIC_API_URL}${headerData.logo.src}`}
@@ -203,7 +195,7 @@ export default function Header() {
               
               {headerData.desktopMenu.map((item, index) => (
                 <li key={index}>
-                  <Link href={getLocalizedHref(item.href)}>
+                  <Link href={(item.href)}>
                     {t(`nav.${item.label}`, item.label)}
                   </Link>
                 </li>
@@ -222,7 +214,7 @@ export default function Header() {
               
               {headerData.desktopMenu.map((item, index) => (
                 <li key={index} onClick={toggleMenu}>
-                  <Link href={getLocalizedHref(item.href)}>
+                  <Link href={(item.href)}>
                     {t(`nav.${item.label}`, item.label)}
                   </Link>
                 </li>
