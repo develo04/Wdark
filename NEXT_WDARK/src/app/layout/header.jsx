@@ -210,7 +210,7 @@ export default function Header() {
 
             {/* Menú desplegable en Móvil */}
             <ul className={`mobile-menu ${menuOpen ? "open" : ""}`}>
-              {error && <li className="error-message">{error}</li>}
+              {error && <li className="error-message webdigital-error">{error}</li>}
               
               {headerData.desktopMenu.map((item, index) => (
                 <li key={index} onClick={toggleMenu}>
@@ -226,4 +226,7 @@ export default function Header() {
       </nav>
     </header>
   );
+
+
 }
+
